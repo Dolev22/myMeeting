@@ -79,18 +79,6 @@ export async function signInAction(
   redirect("/");
 }
 
-// Temporary dev convenience: signs straight in as the seeded Dana demo
-// account via a real signInWithPassword call (not an auth bypass), so the
-// login screen can be skipped while testing locally.
-export async function quickDemoLoginAction() {
-  const supabase = await createClient();
-  await supabase.auth.signInWithPassword({
-    email: "dana@example.com",
-    password: "demo1234",
-  });
-  redirect("/");
-}
-
 export async function signOutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();
