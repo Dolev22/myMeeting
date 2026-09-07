@@ -1,0 +1,107 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getCurrentUserId } from "@/lib/session";
+import { getLocale } from "@/lib/i18n/locale";
+import { getDictionary } from "@/lib/i18n/dictionaries";
+import { listLeads } from "@/lib/repo/leads";
+import { LEAD_STATUSES, type LeadStatus } from "@/lib/types";
+import { Card } from "@/components/ui/card";
+import { LinkButton } from "@/components/ui/button";
+import { Input, Select } from "@/components/ui/field";
+import { LeadStatusBadge } from "@/components/status-badges";
+import { formatDate } from "@/lib/format";
+
+type Search = { q?: string; status?: string };
+
+export default async function LeadsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Search>;
+}) {
+  const [userId, locale, params] = await Promise.all([
+    getCurrentUserId(),
+    getLocale(),
+    searchParams,
+  ]);
+  if (!userId) redirect("/login");
+
+  const dict = getDictionary(locale);
+  const status = (params.status as LeadStatus | "all" | undefined) ?? "all";
+  const leads = await listLeads(userId, { search: params.q, status });
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold text-zinc-900">{dict.leads.title}</h1>
+        <LinkButton href="/leads/new">{dict.leads.newLead}</LinkButton>
+      </div>
+
+      <Card>
+        <form className="flex flex-col gap-3 sm:flex-row" method="get">
+          <Input
+            name="q"
+            defaultValue={params.q ?? ""}
+            placeholder={dict.leads.searchPlaceholder}
+            className="sm:flex-1"
+          />
+          <Select name="status" defaultValue={status} className="sm:w-56">
+            <option value="all">{dict.common.all}</option>
+            {LEAD_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {dict.leadStatus[s]}
+              </option>
+            ))}
+          </Select>
+          <button
+            type="submit"
+            className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-medium text-white hover:bg-teal-800"
+          >
+            {dict.common.filter}
+          </button>
+        </form>
+      </Card>
+
+      <Card className="p-0">
+        {leads.length === 0 ? (
+          <p className="p-6 text-sm text-zinc-500">{dict.common.noResults}</p>
+        ) : (
+          <table className="w-full text-start text-sm">
+            <thead className="border-b border-zinc-200 text-zinc-500">
+              <tr>
+                <th className="px-4 py-3 text-start font-medium">{dict.common.name}</th>
+                <th className="px-4 py-3 text-start font-medium">{dict.common.company}</th>
+                <th className="px-4 py-3 text-start font-medium">{dict.common.phone}</th>
+                <th className="px-4 py-3 text-start font-medium">{dict.common.status}</th>
+                <th className="px-4 py-3 text-start font-medium">
+                  {dict.common.updatedAt}
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {leads.map((lead) => (
+                <tr key={lead.id} className="hover:bg-zinc-50">
+                  <td className="px-4 py-3">
+                    <Link
+                      href={`/leads/${lead.id}`}
+                      className="font-medium text-zinc-900 hover:underline"
+                    >
+                      {lead.name}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3 text-zinc-600">{lead.company ?? "—"}</td>
+                  <td className="px-4 py-3 text-zinc-600">{lead.phone ?? "—"}</td>
+                  <td className="px-4 py-3">
+                    <LeadStatusBadge status={lead.status} />
+                  </td>
+                  <td className="px-4 py-3 text-zinc-500">
+                    {formatDate(lead.updatedAt, locale)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
+    </div>
+  );
+}
