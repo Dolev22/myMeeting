@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { getCurrentUserId } from "@/lib/session";
 import { getLocale } from "@/lib/i18n/locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { listLeads } from "@/lib/repo/leads";
+import { listLatestAnalysesByLead } from "@/lib/repo/website-analyses";
 import { LEAD_STATUSES, type LeadStatus } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input, Select } from "@/components/ui/field";
 import { LeadStatusBadge } from "@/components/status-badges";
+import { AI_ANALYSIS_ANCHOR_ID } from "@/components/leads/website-analysis-card";
 import { formatDate } from "@/lib/format";
 
 type Search = { q?: string; status?: string };
@@ -27,7 +31,10 @@ export default async function LeadsPage({
 
   const dict = getDictionary(locale);
   const status = (params.status as LeadStatus | "all" | undefined) ?? "all";
-  const leads = await listLeads(userId, { search: params.q, status });
+  const [leads, analysesByLead] = await Promise.all([
+    listLeads(userId, { search: params.q, status }),
+    listLatestAnalysesByLead(userId),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -73,31 +80,65 @@ export default async function LeadsPage({
                 <th className="px-4 py-3 text-start font-medium">{dict.common.phone}</th>
                 <th className="px-4 py-3 text-start font-medium">{dict.common.status}</th>
                 <th className="px-4 py-3 text-start font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    <Sparkles size={14} className="text-teal-600 dark:text-teal-400" />
+                    {dict.websiteAnalysis.columnHeader}
+                  </span>
+                </th>
+                <th className="px-4 py-3 text-start font-medium">
                   {dict.common.updatedAt}
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-              {leads.map((lead) => (
-                <tr key={lead.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60">
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/leads/${lead.id}`}
-                      className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
-                    >
-                      {lead.name}
-                    </Link>
-                  </td>
-                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{lead.company ?? "—"}</td>
-                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{lead.phone ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <LeadStatusBadge status={lead.status} />
-                  </td>
-                  <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400">
-                    {formatDate(lead.updatedAt, locale)}
-                  </td>
-                </tr>
-              ))}
+              {leads.map((lead) => {
+                const analysis = analysesByLead.get(lead.id);
+                return (
+                  <tr key={lead.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60">
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/leads/${lead.id}`}
+                        className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
+                      >
+                        {lead.name}
+                      </Link>
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
+                      {lead.company ?? "—"}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
+                      {lead.phone ?? "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <LeadStatusBadge status={lead.status} />
+                    </td>
+                    <td className="px-4 py-3">
+                      {!lead.website ? (
+                        <Badge color="zinc">{dict.websiteAnalysis.statusNoWebsite}</Badge>
+                      ) : (
+                        <Link
+                          href={`/leads/${lead.id}#${AI_ANALYSIS_ANCHOR_ID}`}
+                          className="inline-flex items-center gap-2 hover:underline"
+                        >
+                          <Badge color={analysis ? "green" : "amber"}>
+                            {analysis
+                              ? dict.websiteAnalysis.statusAnalyzed
+                              : dict.websiteAnalysis.statusNotAnalyzed}
+                          </Badge>
+                          <span className="text-xs text-teal-700 dark:text-teal-400">
+                            {analysis
+                              ? dict.websiteAnalysis.viewButton
+                              : dict.websiteAnalysis.runButton}
+                          </span>
+                        </Link>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400">
+                      {formatDate(lead.updatedAt, locale)}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}

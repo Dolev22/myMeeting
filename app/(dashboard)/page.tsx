@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { Sparkles } from "lucide-react";
 import { getCurrentUserId, getCurrentProfile } from "@/lib/session";
 import { getLocale } from "@/lib/i18n/locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { listLeads } from "@/lib/repo/leads";
 import { listMeetings } from "@/lib/repo/meetings";
 import { listDeals } from "@/lib/repo/deals";
+import { listLatestAnalysesByLead } from "@/lib/repo/website-analyses";
 import { Card } from "@/components/ui/card";
+import { LinkButton } from "@/components/ui/button";
 import { formatCurrency, formatDateTime, isWithinHoursFromNow } from "@/lib/format";
 import { redirect } from "next/navigation";
 
@@ -19,11 +22,15 @@ export default async function DashboardPage() {
 
   const dict = getDictionary(locale);
 
-  const [leads, upcomingMeetings, deals] = await Promise.all([
+  const [leads, upcomingMeetings, deals, analysesByLead] = await Promise.all([
     listLeads(userId),
     listMeetings(userId, { when: "upcoming" }),
     listDeals(userId),
+    listLatestAnalysesByLead(userId),
   ]);
+  const leadsWithWebsite = leads.filter((l) => l.website);
+  const analyzedCount = leadsWithWebsite.filter((l) => analysesByLead.has(l.id)).length;
+  const pendingCount = leadsWithWebsite.length - analyzedCount;
   const openLeads = leads.filter(
     (l) => l.status !== "deal_closed" && l.status !== "deal_lost"
   );
@@ -67,6 +74,44 @@ export default async function DashboardPage() {
           </p>
         </Card>
       </div>
+
+      <Card className="border-teal-200 dark:border-teal-900">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-lg font-medium text-zinc-900 dark:text-zinc-50">
+            <Sparkles size={18} className="text-teal-600 dark:text-teal-400" />
+            {dict.websiteAnalysis.dashboardTitle}
+          </h2>
+          <LinkButton href="/leads" variant="secondary" size="sm">
+            {dict.websiteAnalysis.dashboardCta}
+          </LinkButton>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {dict.websiteAnalysis.dashboardWithWebsite}
+            </p>
+            <p className="mt-1 text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+              {leadsWithWebsite.length}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {dict.websiteAnalysis.dashboardAnalyzed}
+            </p>
+            <p className="mt-1 text-2xl font-semibold text-green-700 dark:text-green-400">
+              {analyzedCount}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              {dict.websiteAnalysis.dashboardPending}
+            </p>
+            <p className="mt-1 text-2xl font-semibold text-amber-700 dark:text-amber-400">
+              {pendingCount}
+            </p>
+          </div>
+        </div>
+      </Card>
 
       <Card>
         <h2 className="mb-3 text-lg font-medium text-zinc-900 dark:text-zinc-50">
