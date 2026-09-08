@@ -1,8 +1,28 @@
 @import "tailwindcss";
 
+/* `dark:` utilities respond only to a `.dark` class ancestor (set by the
+   manual theme toggle + cookie), not to prefers-color-scheme directly. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #fafafa;
   --foreground: #18181b;
+  color-scheme: light;
+}
+
+:root.dark {
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Fallback for the rare case JS is disabled and no theme cookie exists yet
+     (native form control styling only — dark: utility classes above already
+     require the .dark class and do not react to this media query). */
+  :root:not(.dark):not(.light) {
+    color-scheme: dark;
+  }
 }
 
 @theme inline {

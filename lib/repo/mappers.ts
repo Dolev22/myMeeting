@@ -1,5 +1,6 @@
 import "server-only";
 import type {
+  AiWebsiteAnalysis,
   Deal,
   DealStatus,
   Lead,
@@ -10,6 +11,7 @@ import type {
   MeetingMethod,
   MeetingStatus,
   Profile,
+  WebsiteAnalysisReport,
 } from "@/lib/types";
 
 // Maps snake_case Postgres rows (Supabase) to the camelCase domain types the
@@ -36,6 +38,7 @@ export function mapLead(row: Record<string, unknown>): Lead {
     phone: (row.phone as string) ?? undefined,
     email: (row.email as string) ?? undefined,
     company: (row.company as string) ?? undefined,
+    website: (row.website as string) ?? undefined,
     source: row.source as LeadSource,
     status: row.status as LeadStatus,
     createdAt: row.created_at as string,
@@ -68,6 +71,17 @@ export function mapMeeting(row: Record<string, unknown>): Meeting {
     calComBookingUid: (row.cal_com_booking_uid as string) ?? undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+  };
+}
+
+export function mapAiWebsiteAnalysis(row: Record<string, unknown>): AiWebsiteAnalysis {
+  return {
+    id: row.id as string,
+    leadId: row.lead_id as string,
+    userId: row.user_id as string,
+    url: row.url as string,
+    report: row.report as WebsiteAnalysisReport,
+    createdAt: row.created_at as string,
   };
 }
 

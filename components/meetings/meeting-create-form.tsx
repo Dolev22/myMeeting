@@ -75,7 +75,7 @@ export function MeetingCreateForm({
         <Textarea id="notes" name="notes" />
       </FormField>
 
-      {state.error && <p className="text-sm text-red-600">{dict.common.required}</p>}
+      {state.error && <p className="text-sm text-red-600 dark:text-red-400">{dict.common.required}</p>}
 
       <Button type="submit" disabled={pending}>
         {dict.common.create}

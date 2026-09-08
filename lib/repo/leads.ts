@@ -51,6 +51,7 @@ export interface LeadInput {
   phone?: string;
   email?: string;
   company?: string;
+  website?: string;
   source: LeadSource;
   status?: LeadStatus;
 }
@@ -65,6 +66,7 @@ export async function createLead(userId: string, input: LeadInput): Promise<Lead
       phone: input.phone,
       email: input.email,
       company: input.company,
+      website: input.website,
       source: input.source,
       status: input.status ?? "new_lead",
     })
@@ -87,6 +89,7 @@ export async function updateLead(
       phone: input.phone,
       email: input.email,
       company: input.company,
+      website: input.website,
       source: input.source,
       status: input.status,
     })

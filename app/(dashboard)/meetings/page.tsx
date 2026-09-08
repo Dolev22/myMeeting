@@ -34,13 +34,15 @@ export default async function MeetingsPage({
   const tabClass = (active: boolean) =>
     cn(
       "rounded-lg px-3 py-1.5 text-sm font-medium",
-      active ? "bg-teal-700 text-white" : "text-zinc-600 hover:bg-zinc-100"
+      active
+        ? "bg-teal-700 text-white dark:bg-teal-600"
+        : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
     );
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-zinc-900">{dict.meetings.title}</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{dict.meetings.title}</h1>
         <LinkButton href="/meetings/new">{dict.meetings.newMeeting}</LinkButton>
       </div>
 
@@ -55,25 +57,25 @@ export default async function MeetingsPage({
 
       <Card className="p-0">
         {meetings.length === 0 ? (
-          <p className="p-6 text-sm text-zinc-500">{dict.common.noResults}</p>
+          <p className="p-6 text-sm text-zinc-500 dark:text-zinc-400">{dict.common.noResults}</p>
         ) : (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {meetings.map((m) => (
               <li key={m.id} className="flex items-center justify-between px-4 py-3">
                 <div>
                   <Link
                     href={`/meetings/${m.id}`}
-                    className="font-medium text-zinc-900 hover:underline"
+                    className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
                   >
                     {m.title}
                   </Link>
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-zinc-500 dark:text-zinc-400">
                     {leadById.get(m.leadId)?.name} ·{" "}
                     {dict.meetingMethod[m.method]}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-zinc-600">
+                  <span className="text-sm text-zinc-600 dark:text-zinc-300">
                     {formatDateTime(m.scheduledAt, locale)}
                   </span>
                   <MeetingStatusBadge status={m.status} />

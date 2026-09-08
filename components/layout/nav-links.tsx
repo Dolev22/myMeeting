@@ -30,8 +30,8 @@ export function NavLinks() {
             className={cn(
               "flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
               active
-                ? "bg-teal-700 text-white"
-                : "text-zinc-700 hover:bg-zinc-100"
+                ? "bg-teal-700 text-white dark:bg-teal-600"
+                : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
             )}
           >
             <Icon size={18} />

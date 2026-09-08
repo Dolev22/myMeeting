@@ -12,6 +12,7 @@ const leadSchema = z.object({
   phone: z.string().trim().optional(),
   email: z.string().trim().email().optional().or(z.literal("")),
   company: z.string().trim().optional(),
+  website: z.string().trim().url().optional().or(z.literal("")),
   source: z.enum(LEAD_SOURCES as [string, ...string[]]),
 });
 
@@ -31,6 +32,7 @@ export async function createLeadAction(
     phone: formData.get("phone") || undefined,
     email: formData.get("email") || undefined,
     company: formData.get("company") || undefined,
+    website: formData.get("website") || undefined,
     source: formData.get("source"),
   });
   if (!parsed.success) return { error: "invalid" };
@@ -39,6 +41,7 @@ export async function createLeadAction(
     ...parsed.data,
     source: parsed.data.source as LeadSource,
     email: parsed.data.email || undefined,
+    website: parsed.data.website || undefined,
   });
   revalidatePath("/leads");
   redirect(`/leads/${lead.id}`);
@@ -53,6 +56,7 @@ export async function updateLeadAction(leadId: string, formData: FormData) {
     phone: formData.get("phone") || undefined,
     email: formData.get("email") || undefined,
     company: formData.get("company") || undefined,
+    website: formData.get("website") || undefined,
     source: formData.get("source"),
   });
   if (!parsed.success) return;
@@ -61,6 +65,7 @@ export async function updateLeadAction(leadId: string, formData: FormData) {
     ...parsed.data,
     source: parsed.data.source as LeadSource,
     email: parsed.data.email || undefined,
+    website: parsed.data.website || undefined,
   });
   revalidatePath("/leads");
   revalidatePath(`/leads/${leadId}`);

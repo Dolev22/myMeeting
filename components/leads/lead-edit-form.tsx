@@ -26,6 +26,15 @@ export function LeadEditForm({ lead }: { lead: Lead }) {
       <FormField label={dict.common.company} htmlFor="company">
         <Input id="company" name="company" defaultValue={lead.company ?? ""} />
       </FormField>
+      <FormField label={dict.common.website} htmlFor="website">
+        <Input
+          id="website"
+          name="website"
+          type="url"
+          placeholder="https://"
+          defaultValue={lead.website ?? ""}
+        />
+      </FormField>
       <FormField label={dict.common.source} htmlFor="source" required>
         <Select id="source" name="source" defaultValue={lead.source} required>
           {LEAD_SOURCES.map((s) => (

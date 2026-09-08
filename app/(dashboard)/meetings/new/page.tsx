@@ -23,7 +23,7 @@ export default async function NewMeetingPage({
 
   return (
     <div className="max-w-xl space-y-6">
-      <h1 className="text-2xl font-semibold text-zinc-900">{dict.meetings.newMeeting}</h1>
+      <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{dict.meetings.newMeeting}</h1>
       <Card>
         <MeetingCreateForm leads={leads} defaultLeadId={params.leadId} />
       </Card>

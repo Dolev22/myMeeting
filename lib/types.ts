@@ -81,10 +81,33 @@ export interface Lead {
   phone?: string;
   email?: string;
   company?: string;
+  website?: string;
   source: LeadSource;
   status: LeadStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface WebsiteAnalysisReport {
+  businessType: string;
+  overview: string;
+  executiveSummary: string;
+  keyProblems: string[];
+  seoIssues: string[];
+  uxIssues: string[];
+  mobileIssues: string[];
+  opportunities: string[];
+  recommendedImprovements: string[];
+  recommendedServices: string[];
+}
+
+export interface AiWebsiteAnalysis {
+  id: string;
+  leadId: string;
+  userId: string;
+  url: string;
+  report: WebsiteAnalysisReport;
+  createdAt: string;
 }
 
 export interface LeadNote {

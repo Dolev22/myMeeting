@@ -23,7 +23,7 @@ export default async function NewDealPage({
 
   return (
     <div className="max-w-xl space-y-6">
-      <h1 className="text-2xl font-semibold text-zinc-900">{dict.deals.newDeal}</h1>
+      <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{dict.deals.newDeal}</h1>
       <Card>
         <DealCreateForm leads={leads} defaultLeadId={params.leadId} />
       </Card>

@@ -31,9 +31,12 @@ export default async function DealDetailPage({
   return (
     <div className="max-w-xl space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-zinc-900">{deal.title}</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{deal.title}</h1>
         {lead && (
-          <Link href={`/leads/${lead.id}`} className="text-sm text-teal-700 hover:underline">
+          <Link
+            href={`/leads/${lead.id}`}
+            className="text-sm text-teal-700 hover:underline dark:text-teal-400"
+          >
             {lead.name}
           </Link>
         )}

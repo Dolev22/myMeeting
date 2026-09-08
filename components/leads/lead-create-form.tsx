@@ -29,13 +29,16 @@ export function LeadCreateForm() {
       <FormField label={dict.common.company} htmlFor="company">
         <Input id="company" name="company" />
       </FormField>
+      <FormField label={dict.common.website} htmlFor="website">
+        <Input id="website" name="website" type="url" placeholder="https://" />
+      </FormField>
       <FormField label={dict.common.source} htmlFor="source" required>
         <select
           id="source"
           name="source"
           required
           defaultValue="website"
-          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600"
+          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-teal-600 focus:outline-none focus:ring-1 focus:ring-teal-600 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100 dark:focus:border-teal-500 dark:focus:ring-teal-500"
         >
           {LEAD_SOURCES.map((s) => (
             <option key={s} value={s}>
@@ -45,7 +48,7 @@ export function LeadCreateForm() {
         </select>
       </FormField>
 
-      {state.error && <p className="text-sm text-red-600">{dict.common.required}</p>}
+      {state.error && <p className="text-sm text-red-600 dark:text-red-400">{dict.common.required}</p>}
 
       <Button type="submit" disabled={pending}>
         {dict.common.create}

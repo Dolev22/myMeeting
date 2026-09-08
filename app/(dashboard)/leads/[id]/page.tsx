@@ -7,6 +7,7 @@ import { getLead } from "@/lib/repo/leads";
 import { listNotes } from "@/lib/repo/notes";
 import { listMeetings } from "@/lib/repo/meetings";
 import { listDeals } from "@/lib/repo/deals";
+import { getLatestAnalysis } from "@/lib/repo/website-analyses";
 import { deleteLeadAction } from "@/lib/actions/leads";
 import { Card } from "@/components/ui/card";
 import { LinkButton } from "@/components/ui/button";
@@ -14,6 +15,7 @@ import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { LeadEditForm } from "@/components/leads/lead-edit-form";
 import { LeadStatusForm } from "@/components/leads/lead-status-form";
 import { AddNoteForm } from "@/components/leads/add-note-form";
+import { WebsiteAnalysisCard } from "@/components/leads/website-analysis-card";
 import { MeetingStatusBadge, DealStatusBadge } from "@/components/status-badges";
 import { formatDateTime, formatCurrency } from "@/lib/format";
 
@@ -34,18 +36,19 @@ export default async function LeadDetailPage({
   if (!lead) notFound();
 
   const dict = getDictionary(locale);
-  const [notes, meetings, deals] = await Promise.all([
+  const [notes, meetings, deals, latestAnalysis] = await Promise.all([
     listNotes(userId, id),
     listMeetings(userId, { leadId: id }),
     listDeals(userId, { leadId: id }),
+    lead.website ? getLatestAnalysis(userId, id) : Promise.resolve(null),
   ]);
 
   return (
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900">{lead.name}</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{lead.name}</h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {dict.leads.assignedTo}: {profile.fullName}
           </p>
         </div>
@@ -53,25 +56,34 @@ export default async function LeadDetailPage({
       </div>
 
       <Card>
-        <h2 className="mb-4 text-lg font-medium text-zinc-900">
+        <h2 className="mb-4 text-lg font-medium text-zinc-900 dark:text-zinc-50">
           {dict.common.edit}
         </h2>
         <LeadEditForm lead={lead} />
       </Card>
 
+      {lead.website && (
+        <WebsiteAnalysisCard
+          leadId={lead.id}
+          website={lead.website}
+          latestAnalysis={latestAnalysis}
+          locale={locale}
+        />
+      )}
+
       <Card>
-        <h2 className="mb-3 text-lg font-medium text-zinc-900">
+        <h2 className="mb-3 text-lg font-medium text-zinc-900 dark:text-zinc-50">
           {dict.common.internalNotes}
         </h2>
         <AddNoteForm leadId={lead.id} />
         {notes.length === 0 ? (
-          <p className="mt-4 text-sm text-zinc-500">{dict.leads.noLeadNotes}</p>
+          <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">{dict.leads.noLeadNotes}</p>
         ) : (
           <ul className="mt-4 space-y-3">
             {notes.map((note) => (
-              <li key={note.id} className="rounded-lg bg-zinc-50 p-3 text-sm">
-                <p className="text-zinc-800 whitespace-pre-wrap">{note.content}</p>
-                <p className="mt-1 text-xs text-zinc-500">
+              <li key={note.id} className="rounded-lg bg-zinc-50 p-3 text-sm dark:bg-zinc-800">
+                <p className="text-zinc-800 dark:text-zinc-200 whitespace-pre-wrap">{note.content}</p>
+                <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                   {formatDateTime(note.createdAt, locale)}
                 </p>
               </li>
@@ -82,7 +94,7 @@ export default async function LeadDetailPage({
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-zinc-900">
+          <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
             {dict.leads.linkedMeetings}
           </h2>
           <LinkButton href={`/meetings/new?leadId=${lead.id}`} size="sm" variant="secondary">
@@ -90,16 +102,16 @@ export default async function LeadDetailPage({
           </LinkButton>
         </div>
         {meetings.length === 0 ? (
-          <p className="text-sm text-zinc-500">{dict.common.noResults}</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{dict.common.noResults}</p>
         ) : (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {meetings.map((m) => (
               <li key={m.id} className="flex items-center justify-between py-2">
-                <Link href={`/meetings/${m.id}`} className="text-sm font-medium text-zinc-900 hover:underline">
+                <Link href={`/meetings/${m.id}`} className="text-sm font-medium text-zinc-900 dark:text-zinc-50 hover:underline">
                   {m.title}
                 </Link>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
                     {formatDateTime(m.scheduledAt, locale)}
                   </span>
                   <MeetingStatusBadge status={m.status} />
@@ -112,22 +124,22 @@ export default async function LeadDetailPage({
 
       <Card>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-zinc-900">{dict.leads.linkedDeals}</h2>
+          <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">{dict.leads.linkedDeals}</h2>
           <LinkButton href={`/deals/new?leadId=${lead.id}`} size="sm" variant="secondary">
             {dict.leads.newDealForLead}
           </LinkButton>
         </div>
         {deals.length === 0 ? (
-          <p className="text-sm text-zinc-500">{dict.common.noResults}</p>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{dict.common.noResults}</p>
         ) : (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
             {deals.map((d) => (
               <li key={d.id} className="flex items-center justify-between py-2">
-                <Link href={`/deals/${d.id}`} className="text-sm font-medium text-zinc-900 hover:underline">
+                <Link href={`/deals/${d.id}`} className="text-sm font-medium text-zinc-900 dark:text-zinc-50 hover:underline">
                   {d.title}
                 </Link>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
                     {formatCurrency(d.value, d.currency, locale)}
                   </span>
                   <DealStatusBadge status={d.status} />

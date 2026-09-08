@@ -26,7 +26,7 @@ export function SignupForm() {
       </FormField>
 
       {state.error && (
-        <p className="text-sm text-red-600">
+        <p className="text-sm text-red-600 dark:text-red-400">
           {state.error === "emailInUse" ? dict.auth.emailInUse : dict.auth.invalid}
         </p>
       )}
@@ -35,7 +35,7 @@ export function SignupForm() {
         {dict.auth.signupButton}
       </Button>
 
-      <p className="text-center text-sm text-zinc-600">
+      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
         {dict.auth.haveAccount}{" "}
         <Link href="/login" className="font-medium text-teal-700 hover:underline">
           {dict.auth.goToLogin}

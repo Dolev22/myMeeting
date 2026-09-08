@@ -32,7 +32,7 @@ export default async function LeadsPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-zinc-900">{dict.leads.title}</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{dict.leads.title}</h1>
         <LinkButton href="/leads/new">{dict.leads.newLead}</LinkButton>
       </div>
 
@@ -63,10 +63,10 @@ export default async function LeadsPage({
 
       <Card className="p-0">
         {leads.length === 0 ? (
-          <p className="p-6 text-sm text-zinc-500">{dict.common.noResults}</p>
+          <p className="p-6 text-sm text-zinc-500 dark:text-zinc-400">{dict.common.noResults}</p>
         ) : (
           <table className="w-full text-start text-sm">
-            <thead className="border-b border-zinc-200 text-zinc-500">
+            <thead className="border-b border-zinc-200 dark:border-zinc-800 text-zinc-500 dark:text-zinc-400">
               <tr>
                 <th className="px-4 py-3 text-start font-medium">{dict.common.name}</th>
                 <th className="px-4 py-3 text-start font-medium">{dict.common.company}</th>
@@ -77,23 +77,23 @@ export default async function LeadsPage({
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100">
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
               {leads.map((lead) => (
-                <tr key={lead.id} className="hover:bg-zinc-50">
+                <tr key={lead.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60">
                   <td className="px-4 py-3">
                     <Link
                       href={`/leads/${lead.id}`}
-                      className="font-medium text-zinc-900 hover:underline"
+                      className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
                     >
                       {lead.name}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-zinc-600">{lead.company ?? "—"}</td>
-                  <td className="px-4 py-3 text-zinc-600">{lead.phone ?? "—"}</td>
+                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{lead.company ?? "—"}</td>
+                  <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">{lead.phone ?? "—"}</td>
                   <td className="px-4 py-3">
                     <LeadStatusBadge status={lead.status} />
                   </td>
-                  <td className="px-4 py-3 text-zinc-500">
+                  <td className="px-4 py-3 text-zinc-500 dark:text-zinc-400">
                     {formatDate(lead.updatedAt, locale)}
                   </td>
                 </tr>

@@ -23,7 +23,7 @@ export function LoginForm() {
       </FormField>
 
       {state.error && (
-        <p className="text-sm text-red-600">
+        <p className="text-sm text-red-600 dark:text-red-400">
           {state.error === "userNotFound" ? dict.auth.userNotFound : dict.auth.invalid}
         </p>
       )}
@@ -32,7 +32,7 @@ export function LoginForm() {
         {dict.auth.loginButton}
       </Button>
 
-      <p className="text-center text-sm text-zinc-600">
+      <p className="text-center text-sm text-zinc-600 dark:text-zinc-400">
         {dict.auth.noAccount}{" "}
         <Link href="/signup" className="font-medium text-teal-700 hover:underline">
           {dict.auth.goToSignup}

@@ -19,14 +19,14 @@ export function LocaleToggle() {
 
   return (
     <div
-      className="inline-flex overflow-hidden rounded-lg border border-zinc-300 text-xs"
+      className="inline-flex overflow-hidden rounded-lg border border-zinc-300 text-xs dark:border-zinc-700"
       aria-label={dict.common.language}
     >
       <button
         type="button"
         onClick={() => switchTo("he")}
         disabled={pending}
-        className={`px-2 py-1 ${locale === "he" ? "bg-teal-700 text-white" : "bg-white text-zinc-600 hover:bg-zinc-50"}`}
+        className={`px-2 py-1 ${locale === "he" ? "bg-teal-700 text-white dark:bg-teal-600" : "bg-white text-zinc-600 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800"}`}
       >
         עברית
       </button>
@@ -34,7 +34,7 @@ export function LocaleToggle() {
         type="button"
         onClick={() => switchTo("en")}
         disabled={pending}
-        className={`px-2 py-1 ${locale === "en" ? "bg-teal-700 text-white" : "bg-white text-zinc-600 hover:bg-zinc-50"}`}
+        className={`px-2 py-1 ${locale === "en" ? "bg-teal-700 text-white dark:bg-teal-600" : "bg-white text-zinc-600 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800"}`}
       >
         EN
       </button>

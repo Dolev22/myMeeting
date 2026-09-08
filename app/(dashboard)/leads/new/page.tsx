@@ -8,7 +8,7 @@ export default async function NewLeadPage() {
 
   return (
     <div className="max-w-xl space-y-6">
-      <h1 className="text-2xl font-semibold text-zinc-900">{dict.leads.newLead}</h1>
+      <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{dict.leads.newLead}</h1>
       <Card>
         <LeadCreateForm />
       </Card>

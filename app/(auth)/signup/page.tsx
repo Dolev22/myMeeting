@@ -9,9 +9,11 @@ export default async function SignupPage() {
 
   return (
     <Card>
-      <h1 className="mb-1 text-xl font-semibold text-zinc-900">{dict.appName}</h1>
-      <h2 className="mb-4 text-sm text-zinc-500">{dict.auth.signupTitle}</h2>
-      <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+      <h1 className="mb-1 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+        {dict.appName}
+      </h1>
+      <h2 className="mb-4 text-sm text-zinc-500 dark:text-zinc-400">{dict.auth.signupTitle}</h2>
+      <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
         {dict.auth.demoNotice}
       </p>
       <SignupForm />
