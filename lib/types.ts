@@ -156,6 +156,23 @@ export interface Task {
   updatedAt: string;
 }
 
+export type ConversationDirection = "incoming" | "outgoing";
+
+export const CONVERSATION_DIRECTIONS: ConversationDirection[] = ["incoming", "outgoing"];
+
+export interface Conversation {
+  id: string;
+  leadId: string;
+  userId: string;
+  occurredAt: string;
+  durationMinutes: number;
+  direction: ConversationDirection;
+  notes?: string;
+  transcription?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Deal {
   id: string;
   leadId: string;

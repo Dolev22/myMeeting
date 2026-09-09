@@ -8,9 +8,11 @@ import { listNotes } from "@/lib/repo/notes";
 import { listMeetings } from "@/lib/repo/meetings";
 import { listDeals } from "@/lib/repo/deals";
 import { listTasks } from "@/lib/repo/tasks";
+import { listConversations } from "@/lib/repo/conversations";
 import { getLatestAnalysis } from "@/lib/repo/website-analyses";
 import { deleteLeadAction } from "@/lib/actions/leads";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { LinkButton } from "@/components/ui/button";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { LeadEditForm } from "@/components/leads/lead-edit-form";
@@ -43,11 +45,12 @@ export default async function LeadDetailPage({
   if (!lead) notFound();
 
   const dict = getDictionary(locale);
-  const [notes, meetings, deals, tasks, latestAnalysis] = await Promise.all([
+  const [notes, meetings, deals, tasks, conversations, latestAnalysis] = await Promise.all([
     listNotes(userId, id),
     listMeetings(userId, { leadId: id }),
     listDeals(userId, { leadId: id }),
     listTasks(userId, { leadId: id }),
+    listConversations(userId, id),
     lead.website ? getLatestAnalysis(userId, id) : Promise.resolve(null),
   ]);
 
@@ -170,6 +173,52 @@ export default async function LeadDetailPage({
                     {formatDateTime(m.scheduledAt, locale)}
                   </span>
                   <MeetingStatusBadge status={m.status} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card id="conversations">
+        <div className="mb-1 flex items-center justify-between">
+          <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
+            {dict.leads.linkedConversations}
+          </h2>
+          <LinkButton href={`/conversations/new?leadId=${lead.id}`} size="sm" variant="secondary">
+            {dict.leads.newConversationForLead}
+          </LinkButton>
+        </div>
+        <p className="mb-3 text-xs text-zinc-500 dark:text-zinc-400">
+          {dict.conversations.relationToMeetingsHint}
+        </p>
+        {conversations.length === 0 ? (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{dict.common.noResults}</p>
+        ) : (
+          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {conversations.map((c) => (
+              <li key={c.id} className="flex items-center justify-between gap-3 py-2">
+                <div>
+                  <Link
+                    href={`/conversations/${c.id}`}
+                    className="text-sm font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
+                  >
+                    {formatDateTime(c.occurredAt, locale)}
+                  </Link>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                    {dict.conversations.duration}: {c.durationMinutes} ·{" "}
+                    {c.notes ? c.notes.slice(0, 60) : dict.common.noResults}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge color={c.transcription ? "green" : "amber"}>
+                    {c.transcription
+                      ? dict.conversations.hasTranscription
+                      : dict.conversations.noTranscription}
+                  </Badge>
+                  <Badge color={c.direction === "incoming" ? "blue" : "teal"}>
+                    {dict.conversationDirection[c.direction]}
+                  </Badge>
                 </div>
               </li>
             ))}

@@ -1,6 +1,8 @@
 import "server-only";
 import type {
   AiWebsiteAnalysis,
+  Conversation,
+  ConversationDirection,
   Deal,
   DealStatus,
   Lead,
@@ -99,6 +101,21 @@ export function mapTask(row: Record<string, unknown>): Task {
     dueDate: (row.due_date as string) ?? undefined,
     assignedTo: (row.assigned_to as string) ?? undefined,
     notes: (row.notes as string) ?? undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+export function mapConversation(row: Record<string, unknown>): Conversation {
+  return {
+    id: row.id as string,
+    leadId: row.lead_id as string,
+    userId: row.user_id as string,
+    occurredAt: row.occurred_at as string,
+    durationMinutes: row.duration_minutes as number,
+    direction: row.direction as ConversationDirection,
+    notes: (row.notes as string) ?? undefined,
+    transcription: (row.transcription as string) ?? undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
