@@ -134,6 +134,28 @@ export interface Meeting {
   updatedAt: string;
 }
 
+export type TaskStatus = "new" | "in_progress" | "completed";
+
+export const TASK_STATUSES: TaskStatus[] = ["new", "in_progress", "completed"];
+
+export type TaskPriority = "low" | "medium" | "high";
+
+export const TASK_PRIORITIES: TaskPriority[] = ["low", "medium", "high"];
+
+export interface Task {
+  id: string;
+  leadId: string;
+  userId: string;
+  name: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  dueDate?: string;
+  assignedTo?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Deal {
   id: string;
   leadId: string;

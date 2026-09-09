@@ -7,6 +7,7 @@ import { getLead } from "@/lib/repo/leads";
 import { listNotes } from "@/lib/repo/notes";
 import { listMeetings } from "@/lib/repo/meetings";
 import { listDeals } from "@/lib/repo/deals";
+import { listTasks } from "@/lib/repo/tasks";
 import { getLatestAnalysis } from "@/lib/repo/website-analyses";
 import { deleteLeadAction } from "@/lib/actions/leads";
 import { Card } from "@/components/ui/card";
@@ -16,8 +17,14 @@ import { LeadEditForm } from "@/components/leads/lead-edit-form";
 import { LeadStatusForm } from "@/components/leads/lead-status-form";
 import { AddNoteForm } from "@/components/leads/add-note-form";
 import { WebsiteAnalysisCard } from "@/components/leads/website-analysis-card";
-import { MeetingStatusBadge, DealStatusBadge } from "@/components/status-badges";
-import { formatDateTime, formatCurrency } from "@/lib/format";
+import {
+  MeetingStatusBadge,
+  DealStatusBadge,
+  TaskStatusBadge,
+  TaskPriorityBadge,
+} from "@/components/status-badges";
+import { formatDateTime, formatCurrency, formatDate, isOverdue } from "@/lib/format";
+import { cn } from "@/lib/cn";
 
 export default async function LeadDetailPage({
   params,
@@ -36,10 +43,11 @@ export default async function LeadDetailPage({
   if (!lead) notFound();
 
   const dict = getDictionary(locale);
-  const [notes, meetings, deals, latestAnalysis] = await Promise.all([
+  const [notes, meetings, deals, tasks, latestAnalysis] = await Promise.all([
     listNotes(userId, id),
     listMeetings(userId, { leadId: id }),
     listDeals(userId, { leadId: id }),
+    listTasks(userId, { leadId: id }),
     lead.website ? getLatestAnalysis(userId, id) : Promise.resolve(null),
   ]);
 
@@ -88,6 +96,53 @@ export default async function LeadDetailPage({
                 </p>
               </li>
             ))}
+          </ul>
+        )}
+      </Card>
+
+      <Card>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
+            {dict.leads.linkedTasks}
+          </h2>
+          <LinkButton href={`/tasks/new?leadId=${lead.id}`} size="sm" variant="secondary">
+            {dict.leads.newTaskForLead}
+          </LinkButton>
+        </div>
+        {tasks.length === 0 ? (
+          <p className="text-sm text-zinc-500 dark:text-zinc-400">{dict.common.noResults}</p>
+        ) : (
+          <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
+            {tasks.map((task) => {
+              const overdue = isOverdue(task.dueDate, task.status);
+              return (
+                <li key={task.id} className="flex items-center justify-between py-2 gap-3">
+                  <Link
+                    href={`/tasks/${task.id}`}
+                    className="text-sm font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
+                  >
+                    {task.name}
+                  </Link>
+                  <div className="flex items-center gap-3">
+                    {task.dueDate && (
+                      <span
+                        className={cn(
+                          "text-xs",
+                          overdue
+                            ? "font-medium text-red-600 dark:text-red-400"
+                            : "text-zinc-500 dark:text-zinc-400"
+                        )}
+                      >
+                        {formatDate(task.dueDate, locale)}
+                        {overdue && ` (${dict.tasks.overdue})`}
+                      </span>
+                    )}
+                    <TaskPriorityBadge priority={task.priority} />
+                    <TaskStatusBadge status={task.status} />
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
       </Card>

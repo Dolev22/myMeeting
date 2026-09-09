@@ -28,6 +28,12 @@ export function isWithinHoursFromNow(iso: string, hours: number) {
   return diffHours <= hours;
 }
 
+export function isOverdue(dueDate: string | undefined, status: string) {
+  if (!dueDate || status === "completed") return false;
+  const today = new Date().toISOString().slice(0, 10);
+  return dueDate < today;
+}
+
 export function formatCurrency(value: number, currency: string, locale: Locale) {
   return new Intl.NumberFormat(intlLocale(locale), {
     style: "currency",

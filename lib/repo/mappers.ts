@@ -11,6 +11,9 @@ import type {
   MeetingMethod,
   MeetingStatus,
   Profile,
+  Task,
+  TaskPriority,
+  TaskStatus,
   WebsiteAnalysisReport,
 } from "@/lib/types";
 
@@ -82,6 +85,22 @@ export function mapAiWebsiteAnalysis(row: Record<string, unknown>): AiWebsiteAna
     url: row.url as string,
     report: row.report as WebsiteAnalysisReport,
     createdAt: row.created_at as string,
+  };
+}
+
+export function mapTask(row: Record<string, unknown>): Task {
+  return {
+    id: row.id as string,
+    leadId: row.lead_id as string,
+    userId: row.user_id as string,
+    name: row.name as string,
+    status: row.status as TaskStatus,
+    priority: row.priority as TaskPriority,
+    dueDate: (row.due_date as string) ?? undefined,
+    assignedTo: (row.assigned_to as string) ?? undefined,
+    notes: (row.notes as string) ?? undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
   };
 }
 
