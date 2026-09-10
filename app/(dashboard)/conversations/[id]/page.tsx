@@ -5,10 +5,12 @@ import { getLocale } from "@/lib/i18n/locale";
 import { getDictionary } from "@/lib/i18n/dictionaries";
 import { getConversation } from "@/lib/repo/conversations";
 import { getLead } from "@/lib/repo/leads";
+import { listTasksBySourceConversation } from "@/lib/repo/tasks";
 import { deleteConversationAction } from "@/lib/actions/conversations";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
+import { ConversationAnalysisPanel } from "@/components/conversations/conversation-analysis-panel";
 import { formatDateTime } from "@/lib/format";
 
 export default async function ConversationDetailPage({
@@ -24,10 +26,13 @@ export default async function ConversationDetailPage({
   if (!conversation) notFound();
 
   const dict = getDictionary(locale);
-  const lead = await getLead(userId, conversation.leadId);
+  const [lead, createdTasks] = await Promise.all([
+    getLead(userId, conversation.leadId),
+    listTasksBySourceConversation(userId, conversation.id),
+  ]);
 
   return (
-    <div className="max-w-xl space-y-6">
+    <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
           {dict.conversations.title}
@@ -64,27 +69,14 @@ export default async function ConversationDetailPage({
             {conversation.notes || dict.common.noResults}
           </p>
         </div>
-
-        <div>
-          <h2 className="mb-1 flex items-center gap-2 text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {dict.conversations.transcription}
-            <Badge color={conversation.transcription ? "green" : "amber"}>
-              {conversation.transcription
-                ? dict.conversations.hasTranscription
-                : dict.conversations.noTranscription}
-            </Badge>
-          </h2>
-          {conversation.transcription ? (
-            <p className="whitespace-pre-wrap text-sm text-zinc-800 dark:text-zinc-200">
-              {conversation.transcription}
-            </p>
-          ) : (
-            <p className="text-sm text-zinc-500 dark:text-zinc-400">
-              {dict.conversations.transcriptionHint}
-            </p>
-          )}
-        </div>
       </Card>
+
+      <ConversationAnalysisPanel
+        conversation={conversation}
+        leadId={conversation.leadId}
+        createdTasks={createdTasks}
+        locale={locale}
+      />
 
       <form action={deleteConversationAction.bind(null, conversation.id, conversation.leadId)}>
         <ConfirmSubmitButton confirmMessage={dict.conversations.deleteConfirm}>

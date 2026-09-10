@@ -2,6 +2,7 @@ import "server-only";
 import type {
   AiWebsiteAnalysis,
   Conversation,
+  ConversationAnalysis,
   ConversationDirection,
   Deal,
   DealStatus,
@@ -101,6 +102,7 @@ export function mapTask(row: Record<string, unknown>): Task {
     dueDate: (row.due_date as string) ?? undefined,
     assignedTo: (row.assigned_to as string) ?? undefined,
     notes: (row.notes as string) ?? undefined,
+    sourceConversationId: (row.source_conversation_id as string) ?? undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };
@@ -116,6 +118,8 @@ export function mapConversation(row: Record<string, unknown>): Conversation {
     direction: row.direction as ConversationDirection,
     notes: (row.notes as string) ?? undefined,
     transcription: (row.transcription as string) ?? undefined,
+    analysis: (row.analysis as ConversationAnalysis) ?? undefined,
+    analyzedAt: (row.analyzed_at as string) ?? undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };

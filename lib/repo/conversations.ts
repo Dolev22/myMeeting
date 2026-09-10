@@ -1,7 +1,7 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import { mapConversation } from "@/lib/repo/mappers";
-import type { Conversation, ConversationDirection } from "@/lib/types";
+import type { Conversation, ConversationAnalysis, ConversationDirection } from "@/lib/types";
 
 // Every function takes `userId` explicitly and filters on it as
 // defense-in-depth, but the real authorization boundary is the Postgres
@@ -63,6 +63,40 @@ export async function createConversation(
     .single();
   if (error) throw error;
   return mapConversation(data);
+}
+
+export async function updateConversationTranscription(
+  userId: string,
+  id: string,
+  transcription: string
+): Promise<Conversation | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("conversations")
+    .update({ transcription })
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapConversation(data) : null;
+}
+
+export async function saveConversationAnalysis(
+  userId: string,
+  id: string,
+  analysis: ConversationAnalysis
+): Promise<Conversation | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("conversations")
+    .update({ analysis, analyzed_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapConversation(data) : null;
 }
 
 export async function deleteConversation(userId: string, id: string): Promise<boolean> {

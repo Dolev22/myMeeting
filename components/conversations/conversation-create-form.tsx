@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { createConversationAction, type ConversationFormState } from "@/lib/actions/conversations";
 import { useI18n } from "@/lib/i18n/client";
 import { CONVERSATION_DIRECTIONS } from "@/lib/types";
+import { MOCK_SALES_CALL_HE } from "@/lib/mock/mock-sales-call";
 import { Button } from "@/components/ui/button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/field";
 
@@ -12,6 +13,10 @@ const initialState: ConversationFormState = {};
 export function ConversationCreateForm({ leadId }: { leadId: string }) {
   const { dict } = useI18n();
   const [state, formAction, pending] = useActionState(createConversationAction, initialState);
+  // Uncontrolled (defaultValue + ref), not controlled React state — see the
+  // comment in ConversationAnalysisPanel for why a controlled value here
+  // caused the Server Action's response stream to abort under some timing.
+  const transcriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const now = new Date();
   const defaultDate = now.toISOString().slice(0, 10);
@@ -58,7 +63,28 @@ export function ConversationCreateForm({ leadId }: { leadId: string }) {
       </FormField>
 
       <FormField label={dict.conversations.transcription} htmlFor="transcription">
-        <Textarea id="transcription" name="transcription" placeholder={dict.conversations.transcriptionPlaceholder} />
+        <Textarea
+          ref={transcriptionRef}
+          id="transcription"
+          name="transcription"
+          placeholder={dict.conversations.transcriptionPlaceholder}
+          className="min-h-48"
+          dir="auto"
+        />
+        <div className="mt-2">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            onClick={() => {
+              if (transcriptionRef.current) {
+                transcriptionRef.current.value = MOCK_SALES_CALL_HE;
+              }
+            }}
+          >
+            {dict.conversations.loadMockButton}
+          </Button>
+        </div>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
           {dict.conversations.transcriptionHint}
         </p>

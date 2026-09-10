@@ -2,6 +2,7 @@ import { cn } from "@/lib/cn";
 import type {
   InputHTMLAttributes,
   LabelHTMLAttributes,
+  Ref,
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
@@ -25,7 +26,9 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={cn(inputBase, props.className)} />;
 }
 
-export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea(
+  props: TextareaHTMLAttributes<HTMLTextAreaElement> & { ref?: Ref<HTMLTextAreaElement> }
+) {
   return <textarea {...props} className={cn(inputBase, "min-h-24", props.className)} />;
 }
 

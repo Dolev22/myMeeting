@@ -152,6 +152,7 @@ export interface Task {
   dueDate?: string;
   assignedTo?: string;
   notes?: string;
+  sourceConversationId?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -159,6 +160,40 @@ export interface Task {
 export type ConversationDirection = "incoming" | "outgoing";
 
 export const CONVERSATION_DIRECTIONS: ConversationDirection[] = ["incoming", "outgoing"];
+
+export type SalesStage =
+  | "discovery"
+  | "solution_presentation"
+  | "proposal"
+  | "negotiation"
+  | "closing";
+
+export const SALES_STAGES: SalesStage[] = [
+  "discovery",
+  "solution_presentation",
+  "proposal",
+  "negotiation",
+  "closing",
+];
+
+export interface SuggestedTask {
+  name: string;
+  dueDate?: string;
+  priority: TaskPriority;
+  owner: "rep" | "customer";
+}
+
+export interface ConversationAnalysis {
+  summary: string;
+  keyTopics: string[];
+  customerNeeds: string[];
+  customerCommitments: string[];
+  repCommitments: string[];
+  recommendedNextSteps: string[];
+  redFlags: string[];
+  recommendedStage: SalesStage;
+  suggestedTasks: SuggestedTask[];
+}
 
 export interface Conversation {
   id: string;
@@ -169,6 +204,8 @@ export interface Conversation {
   direction: ConversationDirection;
   notes?: string;
   transcription?: string;
+  analysis?: ConversationAnalysis;
+  analyzedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

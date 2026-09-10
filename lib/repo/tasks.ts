@@ -74,6 +74,7 @@ export interface TaskInput {
   dueDate?: string;
   assignedTo?: string;
   notes?: string;
+  sourceConversationId?: string;
 }
 
 export async function createTask(userId: string, input: TaskInput): Promise<Task> {
@@ -89,11 +90,50 @@ export async function createTask(userId: string, input: TaskInput): Promise<Task
       due_date: input.dueDate || null,
       assigned_to: input.assignedTo,
       notes: input.notes,
+      source_conversation_id: input.sourceConversationId,
     })
     .select("*")
     .single();
   if (error) throw error;
   return mapTask(data);
+}
+
+export async function createTasks(userId: string, inputs: TaskInput[]): Promise<Task[]> {
+  if (inputs.length === 0) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .insert(
+      inputs.map((input) => ({
+        user_id: userId,
+        lead_id: input.leadId,
+        name: input.name,
+        status: input.status ?? "new",
+        priority: input.priority ?? "medium",
+        due_date: input.dueDate || null,
+        assigned_to: input.assignedTo,
+        notes: input.notes,
+        source_conversation_id: input.sourceConversationId,
+      }))
+    )
+    .select("*");
+  if (error) throw error;
+  return (data ?? []).map(mapTask);
+}
+
+export async function listTasksBySourceConversation(
+  userId: string,
+  conversationId: string
+): Promise<Task[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("source_conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []).map(mapTask);
 }
 
 export async function updateTask(
