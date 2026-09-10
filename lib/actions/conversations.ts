@@ -172,6 +172,7 @@ export async function createTasksFromAnalysisAction(
       suggested.map((task) => ({
         leadId,
         name: task.name,
+        notes: task.description,
         priority: task.priority,
         dueDate: task.dueDate,
         sourceConversationId: conversationId,

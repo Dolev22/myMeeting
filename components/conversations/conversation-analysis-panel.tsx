@@ -315,17 +315,22 @@ export function ConversationAnalysisPanel({
               )}
 
               {createdTasks.length > 0 ? (
-                <ul className="space-y-1 text-sm">
+                <ul className="space-y-2 text-sm">
                   {createdTasks.map((task) => (
-                    <li key={task.id} className="flex items-center justify-between gap-2">
-                      <Link
-                        href={`/tasks/${task.id}`}
-                        className="text-teal-700 hover:underline dark:text-teal-400"
-                      >
-                        {task.name}
-                      </Link>
+                    <li key={task.id} className="flex items-start justify-between gap-2">
+                      <div>
+                        <Link
+                          href={`/tasks/${task.id}`}
+                          className="font-medium text-teal-700 hover:underline dark:text-teal-400"
+                        >
+                          {task.name}
+                        </Link>
+                        {task.notes && (
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400">{task.notes}</p>
+                        )}
+                      </div>
                       {task.dueDate && (
-                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                        <span className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
                           {formatDate(task.dueDate, locale)}
                         </span>
                       )}
@@ -337,11 +342,20 @@ export function ConversationAnalysisPanel({
                   {dict.conversationAnalysis.noSuggestedTasks}
                 </p>
               ) : (
-                <ul className="list-disc space-y-1 ps-5 text-sm text-zinc-600 dark:text-zinc-400">
+                <ul className="space-y-2 text-sm">
                   {analysis.suggestedTasks.map((task, i) => (
-                    <li key={i}>
-                      {task.name}
-                      {task.dueDate && ` — ${formatDate(task.dueDate, locale)}`}
+                    <li key={i} className="flex items-start justify-between gap-2">
+                      <div>
+                        <p className="font-medium text-zinc-800 dark:text-zinc-200">{task.name}</p>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          {task.description}
+                        </p>
+                      </div>
+                      {task.dueDate && (
+                        <span className="shrink-0 text-xs text-zinc-500 dark:text-zinc-400">
+                          {formatDate(task.dueDate, locale)}
+                        </span>
+                      )}
                     </li>
                   ))}
                 </ul>

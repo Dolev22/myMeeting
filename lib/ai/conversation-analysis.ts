@@ -229,6 +229,33 @@ function taskPriorityFor(sentence: string): TaskPriority {
   return "medium";
 }
 
+// --- task title -------------------------------------------------------
+
+// A rep commitment turn is a full, natural sentence — good for the Task
+// description (real context from the call), bad for the Task name/title
+// (a task list of full sentences is unreadable). This maps the sentence to
+// a short, action-oriented title using the same kind of keyword matching
+// used everywhere else in this analyzer — still fully derived from the
+// transcription content, just condensed rather than quoted verbatim.
+const TASK_TITLE_RULES: { title: string; keywords: string[] }[] = [
+  { title: "שליחת הצעת מחיר", keywords: ["הצעת מחיר", "הצעת המחיר"] },
+  { title: "שליחת חוזה / הסכם", keywords: ["חוזה", "הסכם"] },
+  { title: "שליחת מסמך חיסכון", keywords: ["חיסכון"] },
+  { title: "קביעת הדגמה למערכת", keywords: ["הדגמה", "דמו", "אדגים"] },
+  { title: "קביעת פגישת המשך", keywords: ["אקבע", "לתאם פגישה"] },
+  { title: "שיחת מעקב טלפונית", keywords: ["אתקשר", "שיחת טלפון"] },
+  { title: "וידוא קבלת החומרים מול הלקוח", keywords: ["אוודא", "לוודא שהכול הגיע"] },
+  { title: "חזרה ללקוח עם מענה", keywords: ["אחזור אליך", "נחזור אליכם"] },
+];
+
+function deriveTaskTitle(sentence: string): string {
+  for (const rule of TASK_TITLE_RULES) {
+    if (includesAny(sentence, rule.keywords)) return rule.title;
+  }
+  if (includesAny(sentence, REP_COMMIT_MARKERS)) return "שליחת מסמך / מידע ללקוח";
+  return "משימת המשך מול הלקוח";
+}
+
 // --- main entry point -------------------------------------------------------
 
 export async function analyzeConversation(
@@ -272,7 +299,8 @@ export async function analyzeConversation(
     repCommitTurns.map((t) => t.text),
     5
   ).map((text) => ({
-    name: text,
+    name: deriveTaskTitle(text),
+    description: text,
     dueDate: extractDueDate(text, baseDate) ?? addDays(baseDate, 3),
     priority: taskPriorityFor(text),
     owner: "rep" as const,
@@ -280,7 +308,7 @@ export async function analyzeConversation(
 
   const recommendedNextSteps = uniqueCapped(
     [
-      ...suggestedTasks.map((t) => t.name),
+      ...suggestedTasks.map((t) => t.description),
       ...(customerCommitments.length === 0 && repCommitments.length === 0
         ? ["לתאם שיחת המשך תוך מספר ימים כדי לקדם את התהליך."]
         : []),

@@ -178,6 +178,7 @@ export const SALES_STAGES: SalesStage[] = [
 
 export interface SuggestedTask {
   name: string;
+  description: string;
   dueDate?: string;
   priority: TaskPriority;
   owner: "rep" | "customer";
