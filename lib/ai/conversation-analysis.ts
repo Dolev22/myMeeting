@@ -24,23 +24,54 @@ interface Turn {
   text: string;
 }
 
-const REP_PREFIX = /^(נציג(?:ת)?(?:\s*מכירות)?|איש מכירות|rep|sales(?:\s*rep)?)\s*[:：]\s*/i;
-const CUSTOMER_PREFIX = /^(לקוח(?:ה)?|customer|client)\s*[:：]\s*/i;
+// Speaker label can be followed by ":", a full-width "：", or a dash
+// ("-", "–", "—") — real-world pasted transcripts vary here.
+const REP_PREFIX = /^(נציג(?:ת)?(?:\s*מכירות)?|איש מכירות|rep|sales(?:\s*rep)?)\s*[:：\-–—]\s*/i;
+const CUSTOMER_PREFIX = /^(לקוח(?:ה)?|customer|client)\s*[:：\-–—]\s*/i;
+
+// Zero-width and bidi-control characters (LRM/RLM, embedding/override/isolate
+// marks, BOM). These are invisible in a rendered page but commonly get
+// embedded in Hebrew text copy-pasted out of a browser, PDF, or rich text
+// editor — right around a ":" boundary is a common spot — which silently
+// breaks an exact-prefix regex match like the ones above even though the
+// text *looks* identical. Stripping them up front makes speaker-label
+// detection robust regardless of where the transcription text came from.
+const INVISIBLE_CHARS =
+  /[\u200B-\u200F\u202A-\u202E\u2060-\u2069\uFEFF]/g;
+
+function normalizeTranscription(text: string): string {
+  return text
+    .replace(INVISIBLE_CHARS, "")
+    .replace(/ /g, " ") // non-breaking space -> regular space
+    .replace(/\r\n?/g, "\n");
+}
 
 function parseTurns(transcription: string): Turn[] {
-  return transcription
-    .split(/\r?\n+/)
+  const lines = normalizeTranscription(transcription)
+    .split(/\n+/)
     .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      if (REP_PREFIX.test(line)) {
-        return { speaker: "rep" as const, text: line.replace(REP_PREFIX, "").trim() };
-      }
-      if (CUSTOMER_PREFIX.test(line)) {
-        return { speaker: "customer" as const, text: line.replace(CUSTOMER_PREFIX, "").trim() };
-      }
-      return { speaker: "unknown" as const, text: line };
-    });
+    .filter(Boolean);
+
+  let turns: Turn[] = lines.map((line) => {
+    if (REP_PREFIX.test(line)) {
+      return { speaker: "rep" as const, text: line.replace(REP_PREFIX, "").trim() };
+    }
+    if (CUSTOMER_PREFIX.test(line)) {
+      return { speaker: "customer" as const, text: line.replace(CUSTOMER_PREFIX, "").trim() };
+    }
+    return { speaker: "unknown" as const, text: line };
+  });
+
+  // Fallback for a transcript with no recognizable speaker labels at all
+  // (e.g. pasted in a format this parser doesn't know): assume a simple
+  // back-and-forth call and alternate speakers turn by turn, starting with
+  // the rep, rather than silently producing an all-"unknown" analysis.
+  const hasAnyLabeledTurn = turns.some((t) => t.speaker !== "unknown");
+  if (!hasAnyLabeledTurn && turns.length > 0) {
+    turns = turns.map((t, i) => ({ ...t, speaker: i % 2 === 0 ? "rep" : "customer" }));
+  }
+
+  return turns;
 }
 
 function includesAny(text: string, markers: string[]): boolean {
