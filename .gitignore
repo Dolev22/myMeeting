@@ -38,6 +38,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# local test files for the audio upload feature — not app code
+/sample-audio
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

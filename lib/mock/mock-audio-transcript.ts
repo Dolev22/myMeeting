@@ -1,13 +1,18 @@
-// A second, hand-written realistic Hebrew sales-call transcript — used only
-// by the mock transcription provider (lib/ai/mock-transcription.ts) as the
-// simulated "Whisper output" for an uploaded audio file. Deliberately a
-// different scenario from lib/mock/mock-sales-call.ts (the "Load Mock Sales
-// Call" text-paste demo) so the two demo paths don't look identical, while
-// still using the same "נציג:"/"לקוח:" speaker-label convention the local
-// analyzer (lib/ai/conversation-analysis.ts) parses, and covering the same
-// categories it looks for: pain points, key topics, an objection, a
-// customer commitment, and rep commitments with explicit dates.
-export const MOCK_AUDIO_TRANSCRIPT_HE = `נציג: היי רונית, מדבר טל מ-myMeeting, תודה שחזרת אליי. מתאים לדבר כמה דקות?
+// Hand-written realistic Hebrew sales-call transcripts used by the mock
+// transcription provider (lib/ai/mock-transcription.ts) as the simulated
+// "Whisper output" for an uploaded audio file. Deliberately different from
+// lib/mock/mock-sales-call.ts (the "Load Mock Sales Call" text-paste demo)
+// so that demo path doesn't look identical to this one.
+//
+// There's more than one so different uploaded files can be associated with
+// different transcripts (see pickMockTranscript in mock-transcription.ts) —
+// otherwise every upload would produce visibly identical output, which
+// undermines the demo. Each one uses the same "נציג:"/"לקוח:" speaker-label
+// convention the local analyzer (lib/ai/conversation-analysis.ts) parses,
+// and covers the same categories it looks for: pain points, key topics, an
+// objection, a customer commitment, and rep commitments with explicit dates.
+
+export const MOCK_AUDIO_TRANSCRIPT_A = `נציג: היי רונית, מדבר טל מ-myMeeting, תודה שחזרת אליי. מתאים לדבר כמה דקות?
 לקוח: היי טל, כן בהחלט, יש לי כמה דקות בין לקוחות.
 נציג: מעולה. אז ראיתי שמילאתם טופס פנייה באתר - ספרי לי קצת איך אתם מנהלים היום את הלקוחות והפניות בסטודיו.
 לקוח: כרגע הכול מפוזר - חלק בוואטסאפ, חלק בפתקים ליד הקופה, וחלק אני פשוט זוכרת בראש.
@@ -28,3 +33,25 @@ export const MOCK_AUDIO_TRANSCRIPT_HE = `נציג: היי רונית, מדבר �
 נציג: מושלם, נתראה מחר בהדגמה ונדבר שוב עד יום חמישי.
 לקוח: סבבה, תודה רבה טל.
 נציג: תודה לך רונית, נדבר בקרוב.`;
+
+export const MOCK_AUDIO_TRANSCRIPT_B = `נציג: בוקר טוב משה, מדברת מיכל מ-myMeeting. תודה שהסכמת לשיחה קצרה הבוקר.
+לקוח: בוקר טוב, כן, בין לקוח ללקוח, ספרי בקצרה.
+נציג: כמובן. ראיתי שאתם משרד הנהלת חשבונות - איך אתם מנהלים היום את הלקוחות ואת המעקב אחרי מסמכים ותאריכים?
+לקוח: הכול באקסל ובתיקיות מייל. הבעיה האמיתית היא שאנחנו מפספסים תאריכי הגשה ללקוחות בגלל שאין לנו שום תזכורת מרכזית.
+לקוח: וגם, כשלקוח מתקשר אנחנו לוקחים המון זמן למצוא באיזה שלב הוא נמצא מול רשויות המס.
+נציג: זה בדיוק התרחיש שאנחנו פותרים - כל לקוח מקבל ליד עם ציר זמן וכל המסמכים במקום אחד, ותזכורות אוטומטיות לפני כל דדליין.
+לקוח: זה חשוב מאוד אצלנו, במיוחד סביב סוף שנת המס.
+נציג: יש לנו גם דוח שמראה כמה לקוחות פתוחים יש לכל רואה חשבון במשרד, כדי לאזן עומסים.
+לקוח: זה ממש יעזור לנו, כי כרגע חלוקת העבודה לא הוגנת ואנחנו לא רואים את זה בזמן אמת.
+נציג: ומה לגבי תמיכה שוטפת? יש לכם היום מישהו שעונה לשאלות טכניות שוטפות?
+לקוח: לא ממש, וזה תסכל אותנו בעבר עם מערכת אחרת שהשתמשנו בה.
+נציג: אצלנו יש תמיכה זמינה בטלפון ובצ'אט לכל שאלה, בלי לחכות ימים לתשובה.
+לקוח: טוב לשמוע. אני חייב לציין שהתקציב שלנו מוגבל השנה, ואני אצטרך לבדוק מול השותף שלי במשרד לפני שנתקדם.
+לקוח: גם בדקנו כבר הצעה ממערכת מתחרה שהיא קצת יותר זולה מכם.
+נציג: לגמרי מבין, זו השקעה שכדאי לבדוק היטב. אני אשלח לך היום הצעת מחיר מפורטת עם כל המסלולים, כדי שתוכל להשוות בקלות מול השותף שלך.
+לקוח: מעולה, זה יעזור.
+נציג: אני גם אכין לכם מסמך שמראה כמה שעות עבודה בחודש אתם חוסכים אם עוברים אלינו מהאקסל.
+לקוח: טוב, אני אדבר עם השותף שלי השבוע ונחזור אליכם עד יום שלישי.
+נציג: מושלם, אז ההצעה תגיע היום ונחכה לשמוע מכם עד יום שלישי. אם לא נשמע, אני אתקשר ביום רביעי לבדוק מה קורה.
+לקוח: סבבה, תודה מיכל.
+נציג: תודה לך משה, שיהיה יום נעים.`;
