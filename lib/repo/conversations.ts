@@ -82,6 +82,27 @@ export async function updateConversationTranscription(
   return data ? mapConversation(data) : null;
 }
 
+export async function saveConversationAudioMetadata(
+  userId: string,
+  id: string,
+  input: { audioPath: string; audioOriginalFilename: string }
+): Promise<Conversation | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("conversations")
+    .update({
+      audio_path: input.audioPath,
+      audio_original_filename: input.audioOriginalFilename,
+      audio_uploaded_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .eq("user_id", userId)
+    .select("*")
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapConversation(data) : null;
+}
+
 export async function saveConversationAnalysis(
   userId: string,
   id: string,

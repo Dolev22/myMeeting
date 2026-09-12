@@ -4,16 +4,22 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getCurrentUserId } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
 import {
   createConversation,
   deleteConversation,
   getConversation,
   saveConversationAnalysis,
+  saveConversationAudioMetadata,
   updateConversationTranscription,
 } from "@/lib/repo/conversations";
 import { createTasks, listTasksBySourceConversation } from "@/lib/repo/tasks";
 import { analyzeConversation } from "@/lib/ai/conversation-analysis";
+import { transcribeAudio } from "@/lib/ai/transcription-provider";
+import { ALLOWED_AUDIO_EXTENSIONS, MAX_AUDIO_FILE_BYTES, getFileExtension } from "@/lib/audio/constants";
 import { CONVERSATION_DIRECTIONS, type ConversationDirection, type Task } from "@/lib/types";
+
+const AUDIO_BUCKET = "audio-files";
 
 const conversationSchema = z.object({
   leadId: z.string().trim().min(1),
@@ -192,4 +198,118 @@ export async function createTasksFromAnalysisAction(
   revalidatePath("/tasks");
   revalidatePath("/");
   return { createdCount: created.length };
+}
+
+export interface TranscribeAudioResult {
+  error?: string;
+  transcription?: string;
+}
+
+// Audio -> Whisper transcription -> save transcription -> AI analysis ->
+// save analysis, chained into one call so uploading a recording is a single
+// user action (per the AI Conversation Analysis spec). The audio file
+// itself is uploaded directly from the browser to Supabase Storage (see
+// components/conversations/audio-upload-card.tsx) — large recordings would
+// otherwise hit serverless request-body limits going through a Server
+// Action or API route. This action only receives the resulting storage
+// path (a string) and does everything else server-side: downloading the
+// file from private Storage (RLS-scoped to this user, same as the upload),
+// calling Whisper, and reusing the existing local mock analyzer — no
+// duplicate analysis implementation.
+export async function transcribeUploadedAudioAction(
+  conversationId: string,
+  leadId: string,
+  storagePath: string,
+  originalFilename: string
+): Promise<TranscribeAudioResult> {
+  const userId = await getCurrentUserId();
+  if (!userId) return { error: "unauthorized" };
+
+  const conversation = await getConversation(userId, conversationId);
+  if (!conversation) return { error: "not_found" };
+
+  // Defense in depth: the client already validated this, but never trust
+  // client-side validation alone for a value used to build a request.
+  const extension = getFileExtension(originalFilename);
+  if (!(ALLOWED_AUDIO_EXTENSIONS as readonly string[]).includes(extension)) {
+    return { error: "invalid_file_type" };
+  }
+
+  const supabase = await createClient();
+  const { data: audioBlob, error: downloadError } = await supabase.storage
+    .from(AUDIO_BUCKET)
+    .download(storagePath);
+  if (downloadError || !audioBlob) {
+    console.error("[audio-transcription] download from storage failed", {
+      conversationId,
+      leadId,
+      error: downloadError,
+    });
+    return { error: "download_failed" };
+  }
+  if (audioBlob.size > MAX_AUDIO_FILE_BYTES) {
+    return { error: "file_too_large" };
+  }
+
+  try {
+    await saveConversationAudioMetadata(userId, conversationId, {
+      audioPath: storagePath,
+      audioOriginalFilename: originalFilename,
+    });
+  } catch (err) {
+    console.error("[audio-transcription] saving audio metadata failed", {
+      conversationId,
+      leadId,
+      error: err,
+    });
+    return { error: "unknown_error" };
+  }
+
+  let transcriptionText: string;
+  try {
+    transcriptionText = await transcribeAudio({ audio: audioBlob, filename: originalFilename });
+  } catch (err) {
+    // The uploaded file is untouched in Storage and its metadata is already
+    // saved above — nothing is lost, only the transcription step failed.
+    console.error("[audio-transcription] whisper call failed", {
+      conversationId,
+      leadId,
+      error: err instanceof Error ? err.message : err,
+    });
+    return { error: "transcription_failed" };
+  }
+
+  try {
+    await updateConversationTranscription(userId, conversationId, transcriptionText);
+  } catch (err) {
+    console.error("[audio-transcription] saving transcription failed", {
+      conversationId,
+      leadId,
+      error: err,
+    });
+    return { error: "unknown_error" };
+  }
+
+  try {
+    const analysis = await analyzeConversation({
+      transcription: transcriptionText,
+      occurredAt: conversation.occurredAt,
+    });
+    await saveConversationAnalysis(userId, conversationId, analysis);
+  } catch (err) {
+    // Transcription is already saved — only the automatic analysis step
+    // failed. The user can still retry it manually with "Analyze with AI".
+    console.error("[audio-transcription] automatic analysis failed", {
+      conversationId,
+      leadId,
+      error: err,
+    });
+    revalidatePath(`/conversations/${conversationId}`);
+    revalidatePath(`/leads/${leadId}`);
+    return { error: "analysis_failed", transcription: transcriptionText };
+  }
+
+  revalidatePath(`/conversations/${conversationId}`);
+  revalidatePath(`/leads/${leadId}`);
+  return { transcription: transcriptionText };
 }

@@ -13,6 +13,12 @@ import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { ConversationAnalysisPanel } from "@/components/conversations/conversation-analysis-panel";
 import { formatDateTime } from "@/lib/format";
 
+// Extends the timeout for Server Actions invoked from this page — the audio
+// upload flow chains a Storage download, a Whisper API call, and the local
+// analysis into one action (transcribeUploadedAudioAction), which can run
+// longer than the platform's default Server Action timeout.
+export const maxDuration = 60;
+
 export default async function ConversationDetailPage({
   params,
 }: {

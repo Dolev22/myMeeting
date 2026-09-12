@@ -120,6 +120,9 @@ export function mapConversation(row: Record<string, unknown>): Conversation {
     transcription: (row.transcription as string) ?? undefined,
     analysis: (row.analysis as ConversationAnalysis) ?? undefined,
     analyzedAt: (row.analyzed_at as string) ?? undefined,
+    audioPath: (row.audio_path as string) ?? undefined,
+    audioOriginalFilename: (row.audio_original_filename as string) ?? undefined,
+    audioUploadedAt: (row.audio_uploaded_at as string) ?? undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };

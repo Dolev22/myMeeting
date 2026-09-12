@@ -13,6 +13,7 @@ import {
   type CreateTasksFormState,
 } from "@/lib/actions/conversations";
 import { MOCK_SALES_CALL_HE } from "@/lib/mock/mock-sales-call";
+import { AudioUploadCard } from "@/components/conversations/audio-upload-card";
 import { useI18n } from "@/lib/i18n/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -140,6 +141,8 @@ export function ConversationAnalysisPanel({
 
   return (
     <div className="space-y-6">
+      <AudioUploadCard conversation={conversation} leadId={leadId} />
+
       <Card className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">

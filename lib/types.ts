@@ -207,6 +207,9 @@ export interface Conversation {
   transcription?: string;
   analysis?: ConversationAnalysis;
   analyzedAt?: string;
+  audioPath?: string;
+  audioOriginalFilename?: string;
+  audioUploadedAt?: string;
   createdAt: string;
   updatedAt: string;
 }
