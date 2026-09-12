@@ -21,6 +21,28 @@ import { CONVERSATION_DIRECTIONS, type ConversationDirection, type Task } from "
 
 const AUDIO_BUCKET = "audio-files";
 
+// Retries a Supabase call up to 3 times with a short backoff. Added after a
+// production failure where a plain conversations UPDATE came back with a
+// transient "Gateway Timeout" from Supabase's API — a one-off infrastructure
+// blip, not a logic error — which failed the whole upload/transcribe/
+// analyze pipeline for the user with no way to recover short of re-uploading.
+// Only wraps Supabase reads/writes in this action, not the (mock or real)
+// transcription call itself, so this never causes an extra paid Whisper call.
+async function withRetry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (attempt < attempts - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
+
 const conversationSchema = z.object({
   leadId: z.string().trim().min(1),
   date: z.string().trim().min(1),
@@ -236,14 +258,18 @@ export async function transcribeUploadedAudioAction(
   }
 
   const supabase = await createClient();
-  const { data: audioBlob, error: downloadError } = await supabase.storage
-    .from(AUDIO_BUCKET)
-    .download(storagePath);
-  if (downloadError || !audioBlob) {
+  let audioBlob: Blob;
+  try {
+    audioBlob = await withRetry(async () => {
+      const { data, error } = await supabase.storage.from(AUDIO_BUCKET).download(storagePath);
+      if (error || !data) throw error ?? new Error("Empty download from storage");
+      return data;
+    });
+  } catch (err) {
     console.error("[audio-transcription] download from storage failed", {
       conversationId,
       leadId,
-      error: downloadError,
+      error: err,
     });
     return { error: "download_failed" };
   }
@@ -252,10 +278,12 @@ export async function transcribeUploadedAudioAction(
   }
 
   try {
-    await saveConversationAudioMetadata(userId, conversationId, {
-      audioPath: storagePath,
-      audioOriginalFilename: originalFilename,
-    });
+    await withRetry(() =>
+      saveConversationAudioMetadata(userId, conversationId, {
+        audioPath: storagePath,
+        audioOriginalFilename: originalFilename,
+      })
+    );
   } catch (err) {
     console.error("[audio-transcription] saving audio metadata failed", {
       conversationId,
@@ -280,7 +308,7 @@ export async function transcribeUploadedAudioAction(
   }
 
   try {
-    await updateConversationTranscription(userId, conversationId, transcriptionText);
+    await withRetry(() => updateConversationTranscription(userId, conversationId, transcriptionText));
   } catch (err) {
     console.error("[audio-transcription] saving transcription failed", {
       conversationId,
@@ -295,7 +323,7 @@ export async function transcribeUploadedAudioAction(
       transcription: transcriptionText,
       occurredAt: conversation.occurredAt,
     });
-    await saveConversationAnalysis(userId, conversationId, analysis);
+    await withRetry(() => saveConversationAnalysis(userId, conversationId, analysis));
   } catch (err) {
     // Transcription is already saved — only the automatic analysis step
     // failed. The user can still retry it manually with "Analyze with AI".
