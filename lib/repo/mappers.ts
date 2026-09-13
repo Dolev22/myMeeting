@@ -107,6 +107,7 @@ export function mapTask(row: Record<string, unknown>): Task {
     assignedTo: (row.assigned_to as string) ?? undefined,
     notes: (row.notes as string) ?? undefined,
     sourceConversationId: (row.source_conversation_id as string) ?? undefined,
+    sourceWhatsAppConversationId: (row.source_whatsapp_conversation_id as string) ?? undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
   };

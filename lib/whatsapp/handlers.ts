@@ -9,6 +9,7 @@ import {
 } from "@/lib/repo/whatsapp";
 import { generateWhatsAppReply } from "@/lib/ai/whatsapp-response";
 import { getWhatsAppProvider } from "@/lib/whatsapp/provider";
+import { enrichLeadFromWhatsAppConversation } from "@/lib/whatsapp/lead-enrichment";
 import type { WhatsAppWebhookEvent } from "@/lib/whatsapp/types";
 
 // The business logic both the real (future Wasender) and mock webhook
@@ -98,8 +99,9 @@ async function handleMessageReceived(
   // Automatic AI flow (requirement #15): generate a contextual reply and
   // send it right back through the provider, which emits its own
   // message-sent event back into this same webhook.
+  const history = await listWhatsAppMessages(userId, conversation.id, admin);
+
   try {
-    const history = await listWhatsAppMessages(userId, conversation.id, admin);
     const reply = generateWhatsAppReply({
       incomingText: text,
       lead: { name: lead.name, company: lead.company, status: lead.status },
@@ -123,6 +125,14 @@ async function handleMessageReceived(
       error: err instanceof Error ? err.message : err,
     });
   }
+
+  // Fill in the rest of the Lead's card (email/company/website, an internal
+  // note summarizing the conversation, follow-up tasks) from what's been
+  // said so far — best-effort, never blocks the webhook. Re-fetches the
+  // history rather than reusing the pre-reply `history` above, so the just-
+  // sent AI reply is included in the summary/analysis too.
+  const fullHistory = await listWhatsAppMessages(userId, conversation.id, admin);
+  await enrichLeadFromWhatsAppConversation(admin, userId, lead, conversation.id, fullHistory);
 
   return { ok: true, leadId: lead.id, conversationId: conversation.id };
 }

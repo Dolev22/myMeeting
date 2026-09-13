@@ -162,6 +162,7 @@ export interface Task {
   assignedTo?: string;
   notes?: string;
   sourceConversationId?: string;
+  sourceWhatsAppConversationId?: string;
   createdAt: string;
   updatedAt: string;
 }
