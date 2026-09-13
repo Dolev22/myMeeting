@@ -18,6 +18,9 @@ import type {
   TaskPriority,
   TaskStatus,
   WebsiteAnalysisReport,
+  WhatsAppConversation,
+  WhatsAppMessage,
+  WhatsAppMessageDirection,
 } from "@/lib/types";
 
 // Maps snake_case Postgres rows (Supabase) to the camelCase domain types the
@@ -32,6 +35,7 @@ export function mapProfile(row: Record<string, unknown>): Profile {
     phone: (row.phone as string) ?? undefined,
     locale: row.locale as "he" | "en",
     calComUsername: (row.cal_com_username as string) ?? undefined,
+    whatsappPhoneNumber: (row.whatsapp_phone_number as string) ?? undefined,
     createdAt: row.created_at as string,
   };
 }
@@ -125,6 +129,36 @@ export function mapConversation(row: Record<string, unknown>): Conversation {
     audioUploadedAt: (row.audio_uploaded_at as string) ?? undefined,
     createdAt: row.created_at as string,
     updatedAt: row.updated_at as string,
+  };
+}
+
+export function mapWhatsAppConversation(row: Record<string, unknown>): WhatsAppConversation {
+  return {
+    id: row.id as string,
+    userId: row.user_id as string,
+    leadId: row.lead_id as string,
+    phoneNumber: row.phone_number as string,
+    lastMessageAt: row.last_message_at as string,
+    lastMessagePreview: (row.last_message_preview as string) ?? undefined,
+    lastMessageDirection: (row.last_message_direction as WhatsAppMessageDirection) ?? undefined,
+    unread: Boolean(row.unread),
+    analysis: (row.analysis as ConversationAnalysis) ?? undefined,
+    analyzedAt: (row.analyzed_at as string) ?? undefined,
+    createdAt: row.created_at as string,
+    updatedAt: row.updated_at as string,
+  };
+}
+
+export function mapWhatsAppMessage(row: Record<string, unknown>): WhatsAppMessage {
+  return {
+    id: row.id as string,
+    conversationId: row.conversation_id as string,
+    userId: row.user_id as string,
+    direction: row.direction as WhatsAppMessageDirection,
+    isAiGenerated: Boolean(row.is_ai_generated),
+    body: row.body as string,
+    providerMessageId: (row.provider_message_id as string) ?? undefined,
+    createdAt: row.created_at as string,
   };
 }
 

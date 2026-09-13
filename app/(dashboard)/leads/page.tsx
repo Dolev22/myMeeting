@@ -12,6 +12,7 @@ import { LinkButton } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input, Select } from "@/components/ui/field";
 import { LeadStatusBadge } from "@/components/status-badges";
+import { NewFromWhatsAppBadge } from "@/components/whatsapp/new-from-whatsapp-badge";
 import { AI_ANALYSIS_ANCHOR_ID } from "@/components/leads/website-analysis-card";
 import { formatDate } from "@/lib/format";
 
@@ -96,12 +97,17 @@ export default async function LeadsPage({
                 return (
                   <tr key={lead.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/60">
                     <td className="px-4 py-3">
-                      <Link
-                        href={`/leads/${lead.id}`}
-                        className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
-                      >
-                        {lead.name}
-                      </Link>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link
+                          href={`/leads/${lead.id}`}
+                          className="font-medium text-zinc-900 dark:text-zinc-50 hover:underline"
+                        >
+                          {lead.name}
+                        </Link>
+                        {lead.source === "whatsapp" && (
+                          <NewFromWhatsAppBadge createdAt={lead.createdAt} />
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-zinc-600 dark:text-zinc-300">
                       {lead.company ?? "—"}

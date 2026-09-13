@@ -10,6 +10,7 @@ import { listDeals } from "@/lib/repo/deals";
 import { listTasks } from "@/lib/repo/tasks";
 import { listConversations } from "@/lib/repo/conversations";
 import { getLatestAnalysis } from "@/lib/repo/website-analyses";
+import { getWhatsAppConversationByLead } from "@/lib/repo/whatsapp";
 import { deleteLeadAction } from "@/lib/actions/leads";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import { LeadEditForm } from "@/components/leads/lead-edit-form";
 import { LeadStatusForm } from "@/components/leads/lead-status-form";
 import { AddNoteForm } from "@/components/leads/add-note-form";
 import { WebsiteAnalysisCard } from "@/components/leads/website-analysis-card";
+import { NewFromWhatsAppBadge } from "@/components/whatsapp/new-from-whatsapp-badge";
 import {
   MeetingStatusBadge,
   DealStatusBadge,
@@ -45,20 +47,26 @@ export default async function LeadDetailPage({
   if (!lead) notFound();
 
   const dict = getDictionary(locale);
-  const [notes, meetings, deals, tasks, conversations, latestAnalysis] = await Promise.all([
-    listNotes(userId, id),
-    listMeetings(userId, { leadId: id }),
-    listDeals(userId, { leadId: id }),
-    listTasks(userId, { leadId: id }),
-    listConversations(userId, id),
-    lead.website ? getLatestAnalysis(userId, id) : Promise.resolve(null),
-  ]);
+  const [notes, meetings, deals, tasks, conversations, latestAnalysis, whatsappConversation] =
+    await Promise.all([
+      listNotes(userId, id),
+      listMeetings(userId, { leadId: id }),
+      listDeals(userId, { leadId: id }),
+      listTasks(userId, { leadId: id }),
+      listConversations(userId, id),
+      lead.website ? getLatestAnalysis(userId, id) : Promise.resolve(null),
+      getWhatsAppConversationByLead(userId, id),
+    ]);
 
   return (
     <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{lead.name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">{lead.name}</h1>
+            <Badge color="zinc">{dict.leadSource[lead.source]}</Badge>
+            {lead.source === "whatsapp" && <NewFromWhatsAppBadge createdAt={lead.createdAt} />}
+          </div>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             {dict.leads.assignedTo}: {profile.fullName}
           </p>
@@ -177,6 +185,33 @@ export default async function LeadDetailPage({
               </li>
             ))}
           </ul>
+        )}
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50">
+            {dict.whatsapp.relatedConversation}
+          </h2>
+          {whatsappConversation ? (
+            <LinkButton href={`/whatsapp/${whatsappConversation.id}`} size="sm" variant="secondary">
+              {dict.whatsapp.viewConversation}
+            </LinkButton>
+          ) : null}
+        </div>
+        {!whatsappConversation ? (
+          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+            {dict.whatsapp.newConversationForLead}
+          </p>
+        ) : (
+          <div className="mt-2 flex items-center justify-between text-sm">
+            <p className="truncate text-zinc-600 dark:text-zinc-300">
+              {whatsappConversation.lastMessagePreview}
+            </p>
+            <span className="shrink-0 text-xs text-zinc-400 dark:text-zinc-500">
+              {formatDateTime(whatsappConversation.lastMessageAt, locale)}
+            </span>
+          </div>
         )}
       </Card>
 

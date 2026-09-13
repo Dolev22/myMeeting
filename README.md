@@ -35,9 +35,9 @@ Open http://localhost:3000 — you'll land on the login screen. Use one of the
 
 ### Database setup (for a fresh Supabase project)
 
-1. Run the migrations in `supabase/migrations/` in order (`0001_init.sql` then
-   `0002_grants.sql`) against your project — via the SQL Editor, or any
-   Postgres client pointed at your project's connection string.
+1. Run the migrations in `supabase/migrations/` in order against your
+   project — via the SQL Editor, or any Postgres client pointed at your
+   project's connection string.
 2. Seed the two demo accounts and sample data:
    ```bash
    node --env-file=.env.local scripts/seed-demo-data.mjs
@@ -66,3 +66,15 @@ Copy `.env.local.example` to `.env.local` and fill in:
 
 `ANTHROPIC_API_KEY` and `CAL_COM_WEBHOOK_SECRET` are listed for the next build
 phases and aren't used yet.
+
+## WhatsApp integration (mock)
+
+A full WhatsApp inbox (`/whatsapp`) is built against a provider abstraction
+(`lib/whatsapp/`) so it can run entirely without a real WhatsApp number or
+Wasender account — set `WHATSAPP_PROVIDER=mock` (the default) in
+`.env.local`, plus any `WHATSAPP_WEBHOOK_SECRET` value. "Simulate Incoming
+WhatsApp" on that page posts a real `message-received` event through
+`/api/whatsapp/webhook`, which creates/updates a Lead + conversation and
+triggers an automatic local AI reply — no external API calls, no OpenAI/
+Wasender credentials required. See `lib/whatsapp/provider.ts` for how this
+swaps to a real `WHATSAPP_PROVIDER=wasender` later.

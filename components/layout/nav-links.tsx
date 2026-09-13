@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, CalendarClock, Handshake, ListChecks } from "lucide-react";
+import { LayoutDashboard, Users, MessageCircle, CalendarClock, Handshake, ListChecks } from "lucide-react";
 import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/cn";
 
@@ -16,6 +16,7 @@ export function NavLinks() {
     { href: "/tasks", label: dict.nav.tasks, icon: ListChecks },
     { href: "/meetings", label: dict.nav.meetings, icon: CalendarClock },
     { href: "/deals", label: dict.nav.deals, icon: Handshake },
+    { href: "/whatsapp", label: dict.nav.whatsapp, icon: MessageCircle },
   ];
 
   return (

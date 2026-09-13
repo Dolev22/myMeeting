@@ -212,6 +212,65 @@ async function seedLeadsFor(userId, who) {
   }
 }
 
+// A small amount of realistic WhatsApp demo data (requirement #20) so the
+// WhatsApp hub isn't empty on first login — built directly against the same
+// tables the mock provider's webhook flow writes to, not a separate fake
+// dataset. Only seeded for "dana" and only if she has no WhatsApp
+// conversations yet, so re-running this script never duplicates it.
+async function seedWhatsAppDemoFor(userId) {
+  const phone = "+972521112223";
+  const { data: lead, error: leadError } = await admin
+    .from("leads")
+    .insert({
+      user_id: userId,
+      name: "דניאל כהן",
+      phone,
+      source: "whatsapp",
+      status: "new_lead",
+      created_at: iso(-1),
+      updated_at: iso(-1),
+    })
+    .select("*")
+    .single();
+  if (leadError) throw leadError;
+
+  const { data: conversation, error: convError } = await admin
+    .from("whatsapp_conversations")
+    .insert({
+      user_id: userId,
+      lead_id: lead.id,
+      phone_number: phone,
+      last_message_at: iso(-1),
+      last_message_preview: "Hi, I'm interested in your service. Can you send me some information?",
+      last_message_direction: "incoming",
+      unread: false,
+    })
+    .select("*")
+    .single();
+  if (convError) throw convError;
+
+  const { error: messagesError } = await admin.from("whatsapp_messages").insert([
+    {
+      conversation_id: conversation.id,
+      user_id: userId,
+      direction: "incoming",
+      body: "Hi, I'm interested in your service. Can you send me some information?",
+      created_at: iso(-1),
+    },
+    {
+      conversation_id: conversation.id,
+      user_id: userId,
+      direction: "outgoing",
+      is_ai_generated: true,
+      body: "Hi Daniel, thanks for reaching out! We'd love to help — could you tell me a bit more about what you're looking for?",
+      created_at: iso(-0.95),
+    },
+  ]);
+  if (messagesError) throw messagesError;
+
+  console.log("Seeded WhatsApp demo conversation for dana.");
+}
+
 async function main() {
   const [dana, yossi] = await Promise.all([
     upsertUser(demoUsers[0]),
@@ -228,6 +287,16 @@ async function main() {
     console.log("Seeded sample leads/meetings/deals.");
   } else {
     console.log("Sample data already present, skipping.");
+  }
+
+  const { count: whatsappCount } = await admin
+    .from("whatsapp_conversations")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", dana);
+  if (!whatsappCount) {
+    await seedWhatsAppDemoFor(dana);
+  } else {
+    console.log("WhatsApp demo data already present, skipping.");
   }
 
   console.log("Done.");

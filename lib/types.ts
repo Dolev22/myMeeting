@@ -23,6 +23,7 @@ export type LeadSource =
   | "cold_call"
   | "social_media"
   | "cal_com"
+  | "whatsapp"
   | "other";
 
 export const LEAD_SOURCES: LeadSource[] = [
@@ -31,8 +32,15 @@ export const LEAD_SOURCES: LeadSource[] = [
   "cold_call",
   "social_media",
   "cal_com",
+  "whatsapp",
   "other",
 ];
+
+// How long a newly-created WhatsApp lead shows the temporary "New from
+// WhatsApp" indicator, measured from the persisted `Lead.createdAt` — never
+// from client state, so it survives refreshes and is consistent across
+// devices (see lib/format.ts#isWithinHoursFromNow).
+export const NEW_FROM_WHATSAPP_WINDOW_HOURS = 5;
 
 export type MeetingMethod =
   | "in_person"
@@ -71,6 +79,7 @@ export interface Profile {
   phone?: string;
   locale: "he" | "en";
   calComUsername?: string;
+  whatsappPhoneNumber?: string;
   createdAt: string;
 }
 
@@ -212,6 +221,40 @@ export interface Conversation {
   audioUploadedAt?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export type WhatsAppMessageDirection = "incoming" | "outgoing";
+
+export interface WhatsAppMessage {
+  id: string;
+  conversationId: string;
+  userId: string;
+  direction: WhatsAppMessageDirection;
+  isAiGenerated: boolean;
+  body: string;
+  providerMessageId?: string;
+  createdAt: string;
+}
+
+export interface WhatsAppConversation {
+  id: string;
+  userId: string;
+  leadId: string;
+  phoneNumber: string;
+  lastMessageAt: string;
+  lastMessagePreview?: string;
+  lastMessageDirection?: WhatsAppMessageDirection;
+  unread: boolean;
+  analysis?: ConversationAnalysis;
+  analyzedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// A conversation joined with the lead it belongs to, for list/hub views that
+// need to show the contact's name without a second round trip per row.
+export interface WhatsAppConversationWithLead extends WhatsAppConversation {
+  lead: Pick<Lead, "id" | "name" | "phone" | "company" | "email" | "status" | "source" | "createdAt">;
 }
 
 export interface Deal {
