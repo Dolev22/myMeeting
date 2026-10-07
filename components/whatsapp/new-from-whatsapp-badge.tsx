@@ -17,8 +17,10 @@ function subscribeToClockTick(callback: () => void) {
   return () => clearInterval(interval);
 }
 
+// Rounded to the minute (the badge's own resolution): a snapshot has to be
+// stable between ticks, or React reports an uncached getSnapshot.
 function getNow() {
-  return Date.now();
+  return Math.floor(Date.now() / 60_000) * 60_000;
 }
 
 function getServerNow() {

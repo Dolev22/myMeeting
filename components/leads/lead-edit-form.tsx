@@ -6,9 +6,16 @@ import { LEAD_SOURCES, type Lead } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { FormField, Input, Select } from "@/components/ui/field";
 
-export function LeadEditForm({ lead }: { lead: Lead }) {
+export function LeadEditForm({
+  lead,
+  action: actionOverride,
+}: {
+  lead: Lead;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (formData: FormData) => void | Promise<void>;
+}) {
   const { dict } = useI18n();
-  const action = updateLeadAction.bind(null, lead.id);
+  const action = actionOverride ?? updateLeadAction.bind(null, lead.id);
 
   return (
     <form action={action} className="space-y-4">

@@ -7,9 +7,18 @@ import { toDatetimeLocalValue } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/field";
 
-export function MeetingEditForm({ meeting, leads }: { meeting: Meeting; leads: Lead[] }) {
+export function MeetingEditForm({
+  meeting,
+  leads,
+  action: actionOverride,
+}: {
+  meeting: Meeting;
+  leads: Lead[];
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (formData: FormData) => void | Promise<void>;
+}) {
   const { dict } = useI18n();
-  const action = updateMeetingAction.bind(null, meeting.id);
+  const action = actionOverride ?? updateMeetingAction.bind(null, meeting.id);
 
   return (
     <form action={action} className="space-y-4">

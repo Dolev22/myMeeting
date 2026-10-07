@@ -6,24 +6,27 @@ import { LayoutDashboard, Users, MessageCircle, CalendarClock, Handshake, ListCh
 import { useI18n } from "@/lib/i18n/client";
 import { cn } from "@/lib/cn";
 
-export function NavLinks() {
+// `basePath` is the route prefix the links live under: "" for the real,
+// signed-in app and "/demo" for the browser-local demo mode.
+export function NavLinks({ basePath = "" }: { basePath?: string }) {
   const pathname = usePathname();
   const { dict } = useI18n();
+  const home = basePath || "/";
 
   const items = [
-    { href: "/", label: dict.nav.dashboard, icon: LayoutDashboard },
-    { href: "/leads", label: dict.nav.leads, icon: Users },
-    { href: "/tasks", label: dict.nav.tasks, icon: ListChecks },
-    { href: "/meetings", label: dict.nav.meetings, icon: CalendarClock },
-    { href: "/deals", label: dict.nav.deals, icon: Handshake },
-    { href: "/whatsapp", label: dict.nav.whatsapp, icon: MessageCircle },
+    { href: home, label: dict.nav.dashboard, icon: LayoutDashboard },
+    { href: `${basePath}/leads`, label: dict.nav.leads, icon: Users },
+    { href: `${basePath}/tasks`, label: dict.nav.tasks, icon: ListChecks },
+    { href: `${basePath}/meetings`, label: dict.nav.meetings, icon: CalendarClock },
+    { href: `${basePath}/deals`, label: dict.nav.deals, icon: Handshake },
+    { href: `${basePath}/whatsapp`, label: dict.nav.whatsapp, icon: MessageCircle },
   ];
 
   return (
     <nav className="flex flex-col gap-1">
       {items.map((item) => {
         const active =
-          item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+          item.href === home ? pathname === home : pathname.startsWith(item.href);
         const Icon = item.icon;
         return (
           <Link

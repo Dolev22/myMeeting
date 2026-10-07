@@ -1,4 +1,3 @@
-import "server-only";
 import type { WhatsAppMessage } from "@/lib/types";
 
 // Adapts a WhatsApp message thread into the same "נציג:" / "לקוח:"

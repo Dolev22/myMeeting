@@ -6,6 +6,25 @@ export const DEFAULT_LOCALE: Locale = "he";
 const dictionaries = {
   he: {
     appName: "מיי מיטינג",
+    demo: {
+      enterDemo: "כניסה לדמו",
+      enterDemoHint: "ללא הרשמה וללא סיסמה — נתוני דוגמה שנשמרים רק בדפדפן שלכם.",
+      orSignIn: "או התחברות עם חשבון",
+      bannerTitle: "מצב דמו — נתוני דוגמה",
+      bannerText:
+        "השינויים נשמרים רק בדפדפן הזה ולא נשלחים לשום שרת. ניתוחי ה-AI, התמלול והוואטסאפ מדומים.",
+      reset: "איפוס נתוני הדמו",
+      resetConfirm: "לאפס את נתוני הדמו בדפדפן הזה ולחזור לנתוני הדוגמה המקוריים?",
+      exit: "יציאה מהדמו",
+      loading: "טוען את נתוני הדמו...",
+      notFoundTitle: "הרשומה לא נמצאה בנתוני הדמו",
+      notFoundText: "ייתכן שהיא נמחקה, או שנתוני הדמו אופסו.",
+      backToDashboard: "חזרה ללוח הבקרה",
+      audioNote:
+        "מצב דמו: הקובץ נבדק ונשאר בדפדפן שלכם — הוא אינו מועלה לשום מקום ואינו מתומלל באמת. התמלול שיוצג הוא תמלול לדוגמה שהוכן מראש, והניתוח מופק ממנו מקומית.",
+      whatsappNote:
+        "מצב דמו: שום הודעה אינה נשלחת לוואטסאפ. ההודעות והתגובות האוטומטיות מדומות ונשמרות רק בדפדפן שלכם.",
+    },
     nav: {
       dashboard: "לוח בקרה",
       leads: "לידים",
@@ -111,6 +130,8 @@ const dictionaries = {
         "ההתחברות מחוברת ל-Supabase Auth. השתמשו באחד ממשתמשי הדמו או צרו חשבון חדש.",
       demoUsers: "משתמשי דמו",
       userNotFound: "אימייל או סיסמה שגויים.",
+      unavailable:
+        "השירות אינו זמין כרגע — אין חיבור למסד הנתונים. בינתיים אפשר להיכנס לדמו.",
       emailInUse: "כבר קיים חשבון עם האימייל הזה. נסו להתחבר.",
       invalid: "פרטים לא תקינים. בדקו את השדות ונסו שוב.",
     },
@@ -353,6 +374,25 @@ const dictionaries = {
   },
   en: {
     appName: "myMeeting",
+    demo: {
+      enterDemo: "Enter Demo",
+      enterDemoHint: "No sign-up, no password — sample data stored only in your browser.",
+      orSignIn: "or sign in with an account",
+      bannerTitle: "Demo mode — sample data",
+      bannerText:
+        "Changes are saved only in this browser and never sent to a server. The AI analyses, transcription and WhatsApp are simulated.",
+      reset: "Reset demo data",
+      resetConfirm: "Reset the demo data in this browser back to the original sample data?",
+      exit: "Exit demo",
+      loading: "Loading demo data...",
+      notFoundTitle: "This record isn't in the demo data",
+      notFoundText: "It may have been deleted, or the demo data was reset.",
+      backToDashboard: "Back to dashboard",
+      audioNote:
+        "Demo mode: the file is checked and stays in your browser — it is not uploaded anywhere and not actually transcribed. The transcript shown is a prepared sample, and the analysis is generated from it locally.",
+      whatsappNote:
+        "Demo mode: no message is sent to WhatsApp. Messages and automatic replies are simulated and stored only in your browser.",
+    },
     nav: {
       dashboard: "Dashboard",
       leads: "Leads",
@@ -457,6 +497,8 @@ const dictionaries = {
       demoNotice: "Sign-in is backed by Supabase Auth. Use a demo user or create a new account.",
       demoUsers: "Demo users",
       userNotFound: "Incorrect email or password.",
+      unavailable:
+        "The service is temporarily unavailable — the database can't be reached. You can still open the demo.",
       emailInUse: "An account with this email already exists. Try logging in.",
       invalid: "Invalid details. Please check the fields and try again.",
     },

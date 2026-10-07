@@ -71,16 +71,41 @@ const TASKS_ERROR_KEYS = {
   unauthorized: "errorUnauthorized",
 } as const;
 
+// Lets the browser-local demo mode drive this same panel: it swaps the three
+// Server Actions for local equivalents, points the task links at its own
+// route prefix, and supplies its own (simulated) audio upload card. When the
+// props are omitted the panel behaves exactly as it always has.
+export interface ConversationPanelActions {
+  updateTranscription: (
+    state: TranscriptionFormState,
+    formData: FormData
+  ) => TranscriptionFormState | Promise<TranscriptionFormState>;
+  analyze: (
+    state: AnalyzeConversationFormState,
+    formData: FormData
+  ) => AnalyzeConversationFormState | Promise<AnalyzeConversationFormState>;
+  createTasks: (
+    state: CreateTasksFormState,
+    formData: FormData
+  ) => CreateTasksFormState | Promise<CreateTasksFormState>;
+}
+
 export function ConversationAnalysisPanel({
   conversation,
   leadId,
   createdTasks,
   locale,
+  actions,
+  basePath = "",
+  audioUpload,
 }: {
   conversation: Conversation;
   leadId: string;
   createdTasks: Task[];
   locale: Locale;
+  actions?: ConversationPanelActions;
+  basePath?: string;
+  audioUpload?: React.ReactNode;
 }) {
   const { dict } = useI18n();
   const router = useRouter();
@@ -92,15 +117,15 @@ export function ConversationAnalysisPanel({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const [transcriptionState, transcriptionFormAction, transcriptionPending] = useActionState(
-    updateTranscriptionAction.bind(null, conversation.id, leadId),
+    actions?.updateTranscription ?? updateTranscriptionAction.bind(null, conversation.id, leadId),
     transcriptionInitial
   );
   const [analyzeState, analyzeFormAction, analyzePending] = useActionState(
-    analyzeConversationAction.bind(null, conversation.id, leadId),
+    actions?.analyze ?? analyzeConversationAction.bind(null, conversation.id, leadId),
     analyzeInitial
   );
   const [tasksState, tasksFormAction, tasksPending] = useActionState(
-    createTasksFromAnalysisAction.bind(null, conversation.id, leadId),
+    actions?.createTasks ?? createTasksFromAnalysisAction.bind(null, conversation.id, leadId),
     tasksInitial
   );
 
@@ -141,7 +166,7 @@ export function ConversationAnalysisPanel({
 
   return (
     <div className="space-y-6">
-      <AudioUploadCard conversation={conversation} leadId={leadId} />
+      {audioUpload ?? <AudioUploadCard conversation={conversation} leadId={leadId} />}
 
       <Card className="space-y-4">
         <div className="flex items-center justify-between">
@@ -323,7 +348,7 @@ export function ConversationAnalysisPanel({
                     <li key={task.id} className="flex items-start justify-between gap-2">
                       <div>
                         <Link
-                          href={`/tasks/${task.id}`}
+                          href={`${basePath}/tasks/${task.id}`}
                           className="font-medium text-teal-700 hover:underline dark:text-teal-400"
                         >
                           {task.name}

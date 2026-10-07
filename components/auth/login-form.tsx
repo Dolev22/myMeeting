@@ -24,7 +24,11 @@ export function LoginForm() {
 
       {state.error && (
         <p className="text-sm text-red-600 dark:text-red-400">
-          {state.error === "userNotFound" ? dict.auth.userNotFound : dict.auth.invalid}
+          {state.error === "unavailable"
+            ? dict.auth.unavailable
+            : state.error === "userNotFound"
+              ? dict.auth.userNotFound
+              : dict.auth.invalid}
         </p>
       )}
 

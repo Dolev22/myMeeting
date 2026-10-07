@@ -13,12 +13,15 @@ const initialState: TaskFormState = {};
 export function TaskCreateForm({
   leads,
   defaultLeadId,
+  action = createTaskAction,
 }: {
   leads: Lead[];
   defaultLeadId?: string;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (state: TaskFormState, formData: FormData) => TaskFormState | Promise<TaskFormState>;
 }) {
   const { dict } = useI18n();
-  const [state, formAction, pending] = useActionState(createTaskAction, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="space-y-4">

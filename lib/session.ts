@@ -1,9 +1,11 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 import type { Profile } from "@/lib/types";
 import { mapProfile } from "@/lib/repo/mappers";
 
 export async function getCurrentUserId(): Promise<string | null> {
+  if (!isSupabaseConfigured()) return null;
   const supabase = await createClient();
   const {
     data: { user },
@@ -12,6 +14,7 @@ export async function getCurrentUserId(): Promise<string | null> {
 }
 
 export async function getCurrentProfile(): Promise<Profile | null> {
+  if (!isSupabaseConfigured()) return null;
   const supabase = await createClient();
   const {
     data: { user },

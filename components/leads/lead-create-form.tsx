@@ -9,9 +9,14 @@ import { FormField, Input } from "@/components/ui/field";
 
 const initialState: LeadFormState = {};
 
-export function LeadCreateForm() {
+export function LeadCreateForm({
+  action = createLeadAction,
+}: {
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (state: LeadFormState, formData: FormData) => LeadFormState | Promise<LeadFormState>;
+}) {
   const { dict } = useI18n();
-  const [state, formAction, pending] = useActionState(createLeadAction, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="space-y-4">

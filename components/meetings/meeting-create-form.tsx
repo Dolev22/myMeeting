@@ -13,12 +13,15 @@ const initialState: MeetingFormState = {};
 export function MeetingCreateForm({
   leads,
   defaultLeadId,
+  action = createMeetingAction,
 }: {
   leads: Lead[];
   defaultLeadId?: string;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (state: MeetingFormState, formData: FormData) => MeetingFormState | Promise<MeetingFormState>;
 }) {
   const { dict } = useI18n();
-  const [state, formAction, pending] = useActionState(createMeetingAction, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="space-y-4">
