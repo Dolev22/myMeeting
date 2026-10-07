@@ -47,12 +47,28 @@ const SERVER_ERROR_TO_DICT_KEY: Record<string, keyof Dictionary["audioUpload"]> 
   unknown_error: "errorUnknown",
 };
 
+// Stages a simulated run can report while it works (see `simulate` below).
+export type SimulatedAudioStage = "transcribing" | "analyzing";
+
 export function AudioUploadCard({
   conversation,
   leadId,
+  simulate,
+  note,
 }: {
   conversation: Conversation;
   leadId: string;
+  /**
+   * Browser-local demo mode: replaces the whole Supabase Storage upload +
+   * transcription Server Action with a local stand-in. The file is still
+   * validated here first; nothing is uploaded anywhere.
+   */
+  simulate?: (
+    file: File,
+    onStage: (stage: SimulatedAudioStage) => void
+  ) => Promise<{ error?: string }>;
+  /** Extra explanation shown under the title (demo mode says what's simulated). */
+  note?: string;
 }) {
   const { dict } = useI18n();
   const router = useRouter();
@@ -100,6 +116,17 @@ export function AudioUploadCard({
     }
 
     setStage("uploading");
+
+    if (simulate) {
+      const result = await simulate(file, setStage);
+      if (result.error) {
+        setStage("error");
+        setErrorKey(SERVER_ERROR_TO_DICT_KEY[result.error] ?? "errorUnknown");
+      } else {
+        setStage("done");
+      }
+      return;
+    }
 
     const supabase = createClient();
     const {
@@ -174,6 +201,12 @@ export function AudioUploadCard({
         <FileAudio size={18} className="text-teal-600 dark:text-teal-400" />
         {dict.audioUpload.title}
       </h2>
+
+      {note && (
+        <p className="rounded-lg bg-amber-50 p-2 text-xs text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+          {note}
+        </p>
+      )}
 
       {conversation.audioOriginalFilename && stage === "idle" && (
         <p className="text-xs text-zinc-500 dark:text-zinc-400">

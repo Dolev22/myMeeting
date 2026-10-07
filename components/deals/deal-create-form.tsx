@@ -12,12 +12,15 @@ const initialState: DealFormState = {};
 export function DealCreateForm({
   leads,
   defaultLeadId,
+  action = createDealAction,
 }: {
   leads: Lead[];
   defaultLeadId?: string;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (state: DealFormState, formData: FormData) => DealFormState | Promise<DealFormState>;
 }) {
   const { dict } = useI18n();
-  const [state, formAction, pending] = useActionState(createDealAction, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   return (
     <form action={formAction} className="space-y-4">

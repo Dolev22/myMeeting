@@ -42,15 +42,21 @@ export function WebsiteAnalysisCard({
   website,
   latestAnalysis,
   locale,
+  action,
 }: {
   leadId: string;
   website: string;
   latestAnalysis: AiWebsiteAnalysis | null;
   locale: Locale;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (
+    state: WebsiteAnalysisFormState,
+    formData: FormData
+  ) => WebsiteAnalysisFormState | Promise<WebsiteAnalysisFormState>;
 }) {
   const { dict } = useI18n();
   const [state, formAction, pending] = useActionState(
-    runWebsiteAnalysisAction.bind(null, leadId),
+    action ?? runWebsiteAnalysisAction.bind(null, leadId),
     initialState
   );
 

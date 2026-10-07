@@ -6,9 +6,18 @@ import { DEAL_STATUSES, type Deal, type Lead } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/field";
 
-export function DealEditForm({ deal, leads }: { deal: Deal; leads: Lead[] }) {
+export function DealEditForm({
+  deal,
+  leads,
+  action: actionOverride,
+}: {
+  deal: Deal;
+  leads: Lead[];
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (formData: FormData) => void | Promise<void>;
+}) {
   const { dict } = useI18n();
-  const action = updateDealAction.bind(null, deal.id);
+  const action = actionOverride ?? updateDealAction.bind(null, deal.id);
 
   return (
     <form action={action} className="space-y-4">

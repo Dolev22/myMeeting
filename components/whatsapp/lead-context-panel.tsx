@@ -9,9 +9,12 @@ import type { WhatsAppConversationWithLead } from "@/lib/types";
 export function LeadContextPanel({
   conversation,
   locale,
+  basePath = "",
 }: {
   conversation: WhatsAppConversationWithLead;
   locale: Locale;
+  /** Route prefix for the lead links ("/demo" in the browser-local demo mode). */
+  basePath?: string;
 }) {
   const dict = getDictionary(locale);
   const { lead } = conversation;
@@ -23,7 +26,7 @@ export function LeadContextPanel({
       </h2>
       <div className="space-y-1">
         <Link
-          href={`/leads/${lead.id}`}
+          href={`${basePath}/leads/${lead.id}`}
           className="text-base font-semibold text-teal-700 hover:underline dark:text-teal-400"
         >
           {lead.name}
@@ -58,7 +61,7 @@ export function LeadContextPanel({
         </div>
       </dl>
       <Link
-        href={`/leads/${lead.id}`}
+        href={`${basePath}/leads/${lead.id}`}
         className="inline-block text-sm text-teal-700 hover:underline dark:text-teal-400"
       >
         {dict.whatsapp.openLeadProfile}

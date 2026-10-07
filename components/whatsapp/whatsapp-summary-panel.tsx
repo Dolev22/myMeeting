@@ -56,17 +56,23 @@ export function WhatsAppSummaryPanel({
   analyzedAt,
   hasMessages,
   locale,
+  action,
 }: {
   conversationId: string;
   analysis?: ConversationAnalysis;
   analyzedAt?: string;
   hasMessages: boolean;
   locale: Locale;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (
+    state: GenerateSummaryFormState,
+    formData: FormData
+  ) => GenerateSummaryFormState | Promise<GenerateSummaryFormState>;
 }) {
   const { dict } = useI18n();
   const router = useRouter();
   const [state, formAction, pending] = useActionState(
-    generateWhatsAppSummaryAction.bind(null, conversationId),
+    action ?? generateWhatsAppSummaryAction.bind(null, conversationId),
     initialState
   );
 

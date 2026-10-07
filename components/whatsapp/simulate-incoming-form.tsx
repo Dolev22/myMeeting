@@ -14,10 +14,18 @@ const ERROR_KEYS: Record<string, "errorInvalid" | "errorSimulateFailed"> = {
   simulate_failed: "errorSimulateFailed",
 };
 
-export function SimulateIncomingForm() {
+export function SimulateIncomingForm({
+  action = simulateIncomingWhatsAppAction,
+}: {
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (
+    state: SimulateIncomingFormState,
+    formData: FormData
+  ) => SimulateIncomingFormState | Promise<SimulateIncomingFormState>;
+}) {
   const { dict } = useI18n();
   const [open, setOpen] = useState(false);
-  const [state, formAction, pending] = useActionState(simulateIncomingWhatsAppAction, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
 
   if (!open) {
     return (

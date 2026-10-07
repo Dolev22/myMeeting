@@ -10,9 +10,19 @@ import { FormField, Input, Select, Textarea } from "@/components/ui/field";
 
 const initialState: ConversationFormState = {};
 
-export function ConversationCreateForm({ leadId }: { leadId: string }) {
+export function ConversationCreateForm({
+  leadId,
+  action = createConversationAction,
+}: {
+  leadId: string;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (
+    state: ConversationFormState,
+    formData: FormData
+  ) => ConversationFormState | Promise<ConversationFormState>;
+}) {
   const { dict } = useI18n();
-  const [state, formAction, pending] = useActionState(createConversationAction, initialState);
+  const [state, formAction, pending] = useActionState(action, initialState);
   // Uncontrolled (defaultValue + ref), not controlled React state — see the
   // comment in ConversationAnalysisPanel for why a controlled value here
   // caused the Server Action's response stream to abort under some timing.

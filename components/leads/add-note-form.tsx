@@ -5,9 +5,16 @@ import { useI18n } from "@/lib/i18n/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/field";
 
-export function AddNoteForm({ leadId }: { leadId: string }) {
+export function AddNoteForm({
+  leadId,
+  action: actionOverride,
+}: {
+  leadId: string;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (formData: FormData) => void | Promise<void>;
+}) {
   const { dict } = useI18n();
-  const action = addNoteAction.bind(null, leadId);
+  const action = actionOverride ?? addNoteAction.bind(null, leadId);
 
   return (
     <form action={action} className="space-y-2">

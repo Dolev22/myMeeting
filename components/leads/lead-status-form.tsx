@@ -8,12 +8,15 @@ import { Select } from "@/components/ui/field";
 export function LeadStatusForm({
   leadId,
   status,
+  action: actionOverride,
 }: {
   leadId: string;
   status: LeadStatus;
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (formData: FormData) => void | Promise<void>;
 }) {
   const { dict } = useI18n();
-  const action = updateLeadStatusAction.bind(null, leadId);
+  const action = actionOverride ?? updateLeadStatusAction.bind(null, leadId);
 
   return (
     <form

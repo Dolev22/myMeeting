@@ -5,7 +5,7 @@
 // so that demo path doesn't look identical to this one.
 //
 // There's more than one so different uploaded files can be associated with
-// different transcripts (see pickMockTranscript in mock-transcription.ts) —
+// different transcripts (see lib/mock/pick-mock-transcript.ts) —
 // otherwise every upload would produce visibly identical output, which
 // undermines the demo. Each one uses the same "נציג:"/"לקוח:" speaker-label
 // convention the local analyzer (lib/ai/conversation-analysis.ts) parses,

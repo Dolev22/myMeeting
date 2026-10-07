@@ -4,9 +4,18 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { isSupabaseConfigured } from "@/lib/supabase/env";
 
 export interface AuthFormState {
   error?: string;
+}
+
+// A sign-in/sign-up call that never got an answer from Supabase (project
+// paused, network down, 5xx) is not a wrong password — reporting it as one
+// sends people chasing credentials that are actually fine.
+function isBackendUnavailable(error: { name?: string; status?: number }): boolean {
+  const status = error.status ?? 0;
+  return error.name === "AuthRetryableFetchError" || status === 0 || status >= 500;
 }
 
 const signUpSchema = z.object({
@@ -25,6 +34,7 @@ export async function signUpAction(
     password: formData.get("password"),
   });
   if (!parsed.success) return { error: "invalid" };
+  if (!isSupabaseConfigured()) return { error: "unavailable" };
 
   // Created pre-confirmed via the admin API: this project has no custom SMTP
   // configured, so relying on Supabase's built-in confirmation email would
@@ -38,6 +48,7 @@ export async function signUpAction(
   });
 
   if (createError) {
+    if (isBackendUnavailable(createError)) return { error: "unavailable" };
     return {
       error: createError.code === "email_exists" ? "emailInUse" : "invalid",
     };
@@ -67,6 +78,7 @@ export async function signInAction(
     password: formData.get("password"),
   });
   if (!parsed.success) return { error: "invalid" };
+  if (!isSupabaseConfigured()) return { error: "unavailable" };
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
@@ -74,7 +86,7 @@ export async function signInAction(
     password: parsed.data.password,
   });
 
-  if (error) return { error: "userNotFound" };
+  if (error) return { error: isBackendUnavailable(error) ? "unavailable" : "userNotFound" };
 
   redirect("/");
 }

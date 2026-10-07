@@ -27,7 +27,11 @@ export function SignupForm() {
 
       {state.error && (
         <p className="text-sm text-red-600 dark:text-red-400">
-          {state.error === "emailInUse" ? dict.auth.emailInUse : dict.auth.invalid}
+          {state.error === "unavailable"
+            ? dict.auth.unavailable
+            : state.error === "emailInUse"
+              ? dict.auth.emailInUse
+              : dict.auth.invalid}
         </p>
       )}
 

@@ -6,9 +6,18 @@ import { TASK_PRIORITIES, TASK_STATUSES, type Lead, type Task } from "@/lib/type
 import { Button } from "@/components/ui/button";
 import { FormField, Input, Select, Textarea } from "@/components/ui/field";
 
-export function TaskEditForm({ task, leads }: { task: Task; leads: Lead[] }) {
+export function TaskEditForm({
+  task,
+  leads,
+  action: actionOverride,
+}: {
+  task: Task;
+  leads: Lead[];
+  /** Replaces the Server Action (used by the browser-local demo mode). */
+  action?: (formData: FormData) => void | Promise<void>;
+}) {
   const { dict } = useI18n();
-  const action = updateTaskAction.bind(null, task.id);
+  const action = actionOverride ?? updateTaskAction.bind(null, task.id);
 
   return (
     <form action={action} className="space-y-4">

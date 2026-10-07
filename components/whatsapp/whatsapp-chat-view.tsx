@@ -25,10 +25,22 @@ export function WhatsAppChatView({
   conversationId,
   messages,
   locale,
+  actions,
 }: {
   conversationId: string;
   messages: WhatsAppMessage[];
   locale: Locale;
+  /** Replaces the Server Actions (used by the browser-local demo mode). */
+  actions?: {
+    send: (
+      state: SendWhatsAppMessageFormState,
+      formData: FormData
+    ) => SendWhatsAppMessageFormState | Promise<SendWhatsAppMessageFormState>;
+    generateReply: (
+      state: GenerateReplyFormState,
+      formData: FormData
+    ) => GenerateReplyFormState | Promise<GenerateReplyFormState>;
+  };
 }) {
   const { dict } = useI18n();
   const router = useRouter();
@@ -36,11 +48,11 @@ export function WhatsAppChatView({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const [sendState, sendFormAction, sendPending] = useActionState(
-    sendWhatsAppMessageAction.bind(null, conversationId),
+    actions?.send ?? sendWhatsAppMessageAction.bind(null, conversationId),
     sendInitial
   );
   const [replyState, replyFormAction, replyPending] = useActionState(
-    generateAiReplyAction.bind(null, conversationId),
+    actions?.generateReply ?? generateAiReplyAction.bind(null, conversationId),
     replyInitial
   );
 
